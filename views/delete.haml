@@ -1,0 +1,5 @@
+%p
+  "delete #{params[:record]} ?"
+#buttons{:style=>"display:inline;margin-left:1em;"}
+  %a{:href => "/overview", :style=>"margin-right:1em;"} no
+  %a{:href => "#{to("/remove/#{params[:record]}")}", :style=>"margin-right:1em;"} yes

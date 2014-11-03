@@ -1,0 +1,24 @@
+!!!
+%html{:xmlns => "http://www.w3.org/1999/xhtml", "xml:lang" => "en", :lang => "en"}
+  %head
+    %meta{"http-equiv" => "Content-Type", :content=>"text/html; charset=utf-8"}
+    %meta{:name => "robots", :content => "all"} 
+    %meta{:name => "description", :content => "Electronic Music"}   
+    %link{:rel=>"stylesheet", :href=>"/style.css", :type => "text/css"}
+
+    %title alfadeo pipeline
+    
+  %body
+             
+    #top
+      %ul{:style=>"padding-left:0;"}
+        %li{:class => ("selected" if /overview|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin-right:1em;padding:0;"}
+          %a{ :href => "/overview" , :style=>"text-decoration:none;" } overview
+        %li{:class => ("selected" if /upload|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin:1em;padding:0;"}
+          %a{ :href => "/upload" , :style=>"text-decoration:none;" } upload
+      
+      %hr{:style=>"noshade:noshade"}
+    
+    #content
+      = yield
+  

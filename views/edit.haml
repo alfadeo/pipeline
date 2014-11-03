@@ -1,0 +1,14 @@
+- @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
+%p
+  = @text
+%form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
+  %textarea{ :name=>"comment", :rows=>3, :cols=>40} 
+  %input{:type=>"submit", :value => "comment", :style=>"margin:5px;" }
+#delete{:style=>"display:inline;margin-right:1em;"}
+  %a{ :href=>"#{to("/delete/#{locals[:record]}")}", :style=>"text-decoration:none;"}
+    delete
+#download{:style=>"display:inline;text-decoration:none;margin-right:1em;"}
+  %a{ :href=>"#{to("/download/#{locals[:record]}")}", :style=>"text-decoration:none;"}
+    download 
+  (right click)
+%p{:style=>"margin-bottom:4em;"}

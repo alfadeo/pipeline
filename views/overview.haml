@@ -1,0 +1,10 @@
+%h2 
+  overview:
+
+- @records.each do |record|
+  %p
+    = record
+  %audio{ :src=>"#{record}", :controls=>"controls"}
+
+  = haml :edit, :locals => {:record => "#{record}"}
+
