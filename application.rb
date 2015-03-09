@@ -40,9 +40,9 @@ post "/update/:record/?" do
     haml :error
   else
     File.open("public/#{params[:record]}", "a+") {|f|
-      f << "---> #{Time.now.ctime} #{params[:comment].inspect}"
+      f << "- #{params[:comment].inspect}<br>"
     }
-    redirect "/overview"
+    #redirect "/overview"
   end
 end
 

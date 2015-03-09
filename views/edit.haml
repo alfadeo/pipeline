@@ -1,9 +1,20 @@
+
 - @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
-%p
+- @text.gsub!(/\\r\\n/, "")
+- @id = locals[:record].gsub(".mp3", "")
+- idx = locals[:idx]
+%br
+%text{:id=>"#{idx}"}
   = @text
 %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
-  %textarea{ :name=>"comment", :rows=>3, :cols=>40} 
-  %input{:type=>"submit", :value => "comment", :style=>"margin:5px;" }
+  %textarea{ :id =>"field#{idx}", :name=>"comment", :rows=>3, :cols=>40} comment 
+  %input{:id =>"submit_#{idx}", :type=>"submit", :value=>"submit", :onclick => "update('#{idx}')", :style=>"margin:5px;" }
+  :javascript
+    function update(idx){
+      var x = document.getElementById('field'+idx).value;
+      var y = document.getElementById(idx);
+      y.innerHTML = y.innerHTML + '- "' + x + '"<br>' 
+    }
 #delete{:style=>"display:inline;margin-right:1em;"}
   %a{ :href=>"#{to("/delete/#{locals[:record]}")}", :style=>"text-decoration:none;"}
     delete

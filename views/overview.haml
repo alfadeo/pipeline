@@ -1,10 +1,12 @@
 %h2 
   overview:
 
-- @records.each do |record|
-  %p
+- @records.each_with_index do |record, idx|
+  #div{:id=>"#{record.gsub(".mp3","")}"}
     = record
-  %audio{ :src=>"#{record}", :controls=>"controls"}
+    %br
+    %br
+    %audio{ :src=>"#{record}", :controls=>"controls"}
 
-  = haml :edit, :locals => {:record => "#{record}"}
+    = haml :edit, :locals => {:record => "#{record}", :idx => idx}
 
