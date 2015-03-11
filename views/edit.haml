@@ -1,6 +1,6 @@
 
 - @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
-- @text.gsub!(/\\r\\n/, "")
+- @text.gsub!(/\\r\\n/, "<br>")
 - @id = locals[:record].gsub(".mp3", "")
 - idx = locals[:idx]
 %br

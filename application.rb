@@ -35,6 +35,27 @@ post "/upload/?" do
   end
 end
 
+post "/update/favs/:who/?" do
+  case params[:who]
+  when "c"
+    File.open("public/c.txt", "w") {|f|
+      f << "#{params[:favC].inspect}"
+    }
+  when "s"
+    File.open("public/s.txt", "w") {|f|
+      f << "#{params[:favS].inspect}"
+    }
+  when "d"
+    File.open("public/d.txt", "w") {|f|
+      f << "#{params[:favD].inspect}"
+    }
+  when "n"
+    File.open("public/n.txt", "w") {|f|
+      f << "#{params[:favN].inspect}"
+    }
+  end
+end
+
 post "/update/:record/?" do
   if params[:comment] == ""
     haml :error

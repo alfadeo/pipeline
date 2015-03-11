@@ -1,6 +1,51 @@
-%h2 
-  overview:
-
+:javascript
+  function updateC(){
+    var text = "#{File.read File.join "public", "c.txt"}"
+    var x = document.getElementById('textarea#favC').value = text;
+  }
+  function updateS(){
+    var text = "#{File.read File.join "public", "s.txt"}"
+    var x = document.getElementById('textarea#favS').value = text;
+  }
+  function updateD(){
+    var text = "#{File.read File.join "public", "d.txt"}"
+    var x = document.getElementById('textarea#favD').value = text;
+  }
+  function updateN(){
+    var text = "#{File.read File.join "public", "n.txt"}"
+    var x = document.getElementById('textarea#favN').value = text;
+  }
+%table
+  %tr
+    %td
+      %ch
+        c:
+      - c = File.read File.join "public", "c.txt"
+      %form{:action => "/update/favs/c", :method => "post", :onklick=>"updateC()"}
+        %textarea{:name=>"favC", :style=>"width:200px;height:200px;" } #{c.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+        %button#save save
+    %td
+      %sk
+        s:
+      - s = File.read File.join "public", "s.txt"
+      %form{:action => "/update/favs/s", :method => "post", :onklick=>"updateS()"}
+        %textarea{:name=>"favS", :style=>"width:200px;height:200px;"} #{s.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+        %button#save save
+    %td
+      %dg
+        d:
+      - d = File.read File.join "public", "d.txt"
+      %form{:action => "/update/favs/d", :method => "post", :onklick=>"updateD()"}
+        %textarea{:name=>"favD", :style=>"width:200px;height:200px;"} #{d.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+        %button#save save
+    %td
+      %ab
+        n:
+      - n = File.read File.join "public", "n.txt"
+      %form{:action => "/update/favs/n", :method => "post", :onklick=>"updateN()"}
+        %textarea{:name=>"favN", :style=>"width:200px;height:200px;"} #{n.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+        %button#save save
+%hr
 - @records.each_with_index do |record, idx|
   #div{:id=>"#{record.gsub(".mp3","")}"}
     = record
@@ -9,4 +54,4 @@
     %audio{ :src=>"#{record}", :controls=>"controls"}
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
-
+    %hr
