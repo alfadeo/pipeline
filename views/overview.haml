@@ -48,10 +48,24 @@
 %hr
 - @records.each_with_index do |record, idx|
   #div{:id=>"#{record.gsub(".mp3","")}"}
-    = record
+    %h1
+      = record
     %br
     %br
-    %audio{ :src=>"#{record}", :controls=>"controls"}
+    %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls"}
+  :javascript
+    var audio = document.getElementById("player#{idx}");
+    /*audio.addEventListener("playing", function() {
+      $.each($('audio'), function(){
+        if(this !== audio){
+          this.pause()
+        }
+      })
+    })*/
+    audio.addEventListener("ended", function() {
+      audio = document.getElementById("player#{idx+1}");
+      audio.play();
+    })
 
-    = haml :edit, :locals => {:record => "#{record}", :idx => idx}
-    %hr
+  = haml :edit, :locals => {:record => "#{record}", :idx => idx}
+  %hr

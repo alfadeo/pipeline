@@ -54,6 +54,7 @@ post "/update/favs/:who/?" do
       f << "#{params[:favN].inspect}"
     }
   end
+  redirect "/overview"
 end
 
 post "/update/:record/?" do
@@ -63,7 +64,7 @@ post "/update/:record/?" do
     File.open("public/#{params[:record]}", "a+") {|f|
       f << "- #{params[:comment].inspect}<br>"
     }
-    #redirect "/overview"
+    redirect "/overview"
   end
 end
 
@@ -82,8 +83,9 @@ get "/remove/:record/?" do
   `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
   redirect "/overview"
 end
-
+=begin
 get "/style.css" do
   headers "Content-Type" => "text/css; charset=utf-8"
   scss :style
 end
+=end
