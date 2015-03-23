@@ -65,6 +65,7 @@
     audio#{idx}.addEventListener("ended", function() {
       //audio = document.getElementById("player#{idx+1}");
       audio#{idx+1}.play();
+      document.getElementById("player#{idx+1}").focus();
     })
 
   = haml :edit, :locals => {:record => "#{record}", :idx => idx}
