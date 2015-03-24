@@ -10,7 +10,7 @@ end
 get "/overview/?" do
   # display overview
   accepted = [".mp3"]
-  @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}
+  @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
   haml :overview
 end
 
