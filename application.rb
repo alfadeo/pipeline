@@ -19,6 +19,18 @@ get "/upload/?" do
   haml :upload
 end
 
+get "/links/?" do
+  haml :links
+end
+
+post "/links/?" do
+  File.open("public/links.txt", "a+") {|f|
+    f << "* <a href="+"#{params[:comment].inspect.gsub("\"", "")}"+">#{params[:comment].inspect}</a><br>"
+  }
+
+  redirect "/links"
+end
+
 # store file
 post "/upload/?" do
   if !params[:file]

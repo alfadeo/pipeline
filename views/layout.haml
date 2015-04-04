@@ -17,6 +17,8 @@
           %a{ :href => "/overview" , :style=>"text-decoration:none;" } overview
         %li{:class => ("selected" if /upload|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin:1em;padding:0;"}
           %a{ :href => "/upload" , :style=>"text-decoration:none;" } upload
+        %li{:class => ("selected" if /links|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin:1em;padding:0;"}
+          %a{ :href => "/links" , :style=>"text-decoration:none;" } links
       
       %hr{:style=>"noshade:noshade"}
     

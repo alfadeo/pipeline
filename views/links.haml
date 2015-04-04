@@ -1,0 +1,8 @@
+- @text = File.read File.join "public/links.txt"
+- @text.gsub!(/\\r\\n/, "<br>")
+%text
+  = @text.gsub("\"", "")
+%form{:name => "form", :action => to('/links'), :method => "post", :enctype => "multipart/form-data" }
+  %input{:id =>"submit", :type=>"text", :name=>"comment", :value=>"", :size=>"100" }
+  %button{:id=>"store"} store
+
