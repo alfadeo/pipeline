@@ -15,58 +15,51 @@
     var text = "#{File.read File.join "public", "n.txt"}"
     var x = document.getElementById('textarea#favN').value = text;
   }
-%table
-  %tr
-    %td
-      %ch
-        c:
-      - c = File.read File.join "public", "c.txt"
-      %form{:action => "/update/favs/c", :method => "post", :onklick=>"updateC()"}
-        %textarea{:name=>"favC", :style=>"width:200px;height:200px;" } #{c.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-        %button#save save
-    %td
-      %sk
-        s:
-      - s = File.read File.join "public", "s.txt"
-      %form{:action => "/update/favs/s", :method => "post", :onklick=>"updateS()"}
-        %textarea{:name=>"favS", :style=>"width:200px;height:200px;"} #{s.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-        %button#save save
-    %td
-      %dg
-        d:
-      - d = File.read File.join "public", "d.txt"
-      %form{:action => "/update/favs/d", :method => "post", :onklick=>"updateD()"}
-        %textarea{:name=>"favD", :style=>"width:200px;height:200px;"} #{d.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-        %button#save save
-    %td
-      %ab
-        n:
-      - n = File.read File.join "public", "n.txt"
-      %form{:action => "/update/favs/n", :method => "post", :onklick=>"updateN()"}
-        %textarea{:name=>"favN", :style=>"width:200px;height:200px;"} #{n.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-        %button#save save
+#div.row
+  #ch.col-xs-3
+    c:
+    - c = File.read File.join "public", "c.txt"
+    %form{:style=>"width:200px;", :action => "/update/favs/c", :method => "post", :onklick=>"updateC()"}
+      %textarea.form-control.input-medium{:name=>"favC", :rows=>"5"} #{c.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+    %button.btn save
+  #sk.col-xs-3
+    s:
+    - s = File.read File.join "public", "s.txt"
+    %form{:style=>"width:200px;", :action => "/update/favs/s", :method => "post", :onklick=>"updateS()"}
+      %textarea.form-control.input-medium{:name=>"favS", :rows=>"5"} #{s.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+    %button.btn save
+  #dg.col-xs-3
+    d:
+    - d = File.read File.join "public", "d.txt"
+    %form{:style=>"width:200px;", :action => "/update/favs/d", :method => "post", :onklick=>"updateD()"}
+      %textarea.form-control.input-medium{:name=>"favD", :rows=>"5"} #{d.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+    %button.btn save
+  #ab.col-xs-3
+    n:
+    - n = File.read File.join "public", "n.txt"
+    %form{:style=>"width:200px;", :action => "/update/favs/n", :method => "post", :onklick=>"updateN()"}
+      %textarea.form-control.input-medium{:name=>"favN", :rows=>"5"} #{n.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
+    %button.btn save
 %hr
 - @records.each_with_index do |record, idx|
-  #div{:id=>"#{record.gsub(".mp3","")}"}
+  #div.well.well-sm{:id=>"#{record.gsub(".mp3","")}"}
     %h3
       = record
-    %br
-    %br
-    %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls"}
-  :javascript
-    var audio#{idx} = document.getElementById("player#{idx}");
-    audio#{idx}.addEventListener("playing", function() {
-      $.each($('audio'), function(){
-        if(this !== audio#{idx}){
-          this.pause()
-        }
+    %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls", :style=>"float:left;"}
+    :javascript
+      var audio#{idx} = document.getElementById("player#{idx}");
+      audio#{idx}.addEventListener("playing", function() {
+        $.each($('audio'), function(){
+          if(this !== audio#{idx}){
+            this.pause()
+          }
+        })
       })
-    })
-    audio#{idx}.addEventListener("ended", function() {
-      //audio = document.getElementById("player#{idx+1}");
-      audio#{idx+1}.play();
-      document.getElementById("player#{idx+1}").focus();
-    })
+      audio#{idx}.addEventListener("ended", function() {
+        //audio = document.getElementById("player#{idx+1}");
+        audio#{idx+1}.play();
+        document.getElementById("player#{idx+1}").focus();
+      })
 
-  = haml :edit, :locals => {:record => "#{record}", :idx => idx}
+    = haml :edit, :locals => {:record => "#{record}", :idx => idx}
   %hr

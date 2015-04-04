@@ -1,6 +1,7 @@
-%h2
+%h3
   upload(mp3):
 
-%form{:action=>"/upload", :method=>"post", :enctype=>'multipart/form-data'}
+%form.well{:action=>"/upload", :method=>"post", :enctype=>'multipart/form-data'}
   %input{:type=>'file', :name=>'file'}
-  %input{:type=>'submit', :value=>'Upload', :style=>"margin:2em"}
+  %br
+  %input.btn.btn-default{:type=>'submit', :value=>'Upload'}

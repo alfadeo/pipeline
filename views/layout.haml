@@ -1,25 +1,35 @@
 !!! 5
 %html{:xmlns => "http://www.w3.org/1999/xhtml", "xml:lang" => "en", :lang => "en"}
   %head
-    %meta{"http-equiv" => "Content-Type", :content=>"text/html; charset=utf-8"}
-    -#%meta{:name => "robots", :content => "all"} 
-    %meta{:name => "description", :content => "Electronic Music"}   
-    %script{ :src=>"/js/jquery-1.8.3.min.js", :type=>"text/javascript"}
-    -#%link{:rel=>"stylesheet", :href=>"/style.css", :type => "text/css"}
+    %meta{"http-equiv" => "X-UA-Compatible", :content=>"IE=edge; charset=utf-8"}
+    %meta{:name => "viewport", :content => "width=device-width; initial-scale=1"}
+    %meta{:name => "robots", :content => "all"} 
+    %meta{:name => "description", :content => "Electronic Music"}
+    %script{:src=>"/js/jquery-1.11.2.min.js", :type=>"text/javascript"}
+    %script{:src=>"/js/bootstrap.min.js", :type=>"text/javascript"}
+    %link{:href=>"/css/bootstrap.min.css", :rel=>"stylesheet"}
+    %link{:href=>"/css/offcanvas.css", :rel=>"stylesheet"}
 
     %title alfadeo pipeline
     
-  %body
-             
-    #top
-      %ul{:style=>"padding-left:0;"}
-        %li{:class => ("selected" if /overview|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin-right:1em;padding:0;"}
-          %a{ :href => "/overview" , :style=>"text-decoration:none;" } overview
-        %li{:class => ("selected" if /upload|\/$/ =~ request.path), :style=>"display:inline;list-style:none;margin:1em;padding:0;"}
-          %a{ :href => "/upload" , :style=>"text-decoration:none;" } upload
+  %body{:style=>"background-color:#EFEFEF;"}
+    %nav{:class=>"navbar navbar-fixed-top navbar-inverse"}
+      %div.container-fluid
+        %div{:class=>"navbar-header"}
+          %button{:class=>"navbar-toggle collapsed", :aria=>{:controls=>"navbar", :expanded=>"false"}, :data=>{:target=>"#navbar", :toggle=>"collapse"}}
+            %span{:class=>"sr-only"} Toggle navigation
+            %span{:class=>"icon-bar"}
+            %span{:class=>"icon-bar"}
+            %span{:class=>"icon-bar"}
+      %div{:id=>"navbar", :class=>"navbar-collapse collapse", :aria=>{:expanded=>"false"}, :style=>"height: 1px;"} 
+        %ul{:class => "nav navbar-nav"}
+          %li{:class => ("selected" if /overview|\/$/ =~ request.path) }
+            %a{ :href => "/overview" , :style=>"text-decoration:none;" } overview
+          %li{:class => ("selected" if /upload|\/$/ =~ request.path)}
+            %a{ :href => "/upload" , :style=>"text-decoration:none;" } upload
+          %li{:class => ("selected" if /links|\/$/ =~ request.path)}
+            %a{ :href => "/links" , :style=>"text-decoration:none;" } links
       
-      %hr{:style=>"noshade:noshade"}
-    
-    #content
+    %div.container-fluid
       = yield
   
