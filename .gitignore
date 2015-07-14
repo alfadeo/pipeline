@@ -1,4 +1,6 @@
 Gemfile.lock
 public/*
+!public/css
+!public/js
 tmp/*
 log/*
