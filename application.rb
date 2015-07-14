@@ -1,7 +1,11 @@
 require "rubygems"
 require "sinatra"
 require "haml"
+require File.join "./auth.rb"
 
+use Rack::Auth::Basic, "Restricted Area" do |username, password|
+  [username, password] == [$user, $pass]
+end
 
 get "/?" do
   redirect "/overview"
@@ -95,9 +99,4 @@ get "/remove/:record/?" do
   `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
   redirect "/overview"
 end
-=begin
-get "/style.css" do
-  headers "Content-Type" => "text/css; charset=utf-8"
-  scss :style
-end
-=end
+
