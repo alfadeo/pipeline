@@ -1,0 +1,12 @@
+#login.modal-fade.modal-dialog
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-body
+        wer bisch du
+        %form{:action=>to("/overview"), :method=>"get"}
+          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"s"} s
+          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"c"} c
+          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"d"} d
+          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"n"} n
+          %hr
+          %input.radio{:type=>"submit", :value=>"OK"}
