@@ -3,18 +3,49 @@ require "sinatra"
 require "haml"
 require File.join "./auth.rb"
 
-use Rack::Auth::Basic, "Restricted Area" do |username, password|
+use Rack::Auth::Basic, "Tell me" do |username, password|
   [username, password] == [$user, $pass]
 end
 
+set :raise_errors, false
+set :show_exceptions, false
+
+error do
+  redirect to('/')
+end
+
 get "/?" do
-  redirect "/overview"
+  @@user = "user?"
+  haml :login
+  #redirect "/overview"
 end
 
 get "/overview/?" do
+  if params[:user]
+    @@user = params[:user]
+  elsif @@user
+    @@user = @@user
+  else
+    @@user = "user?"
+  end
   # display overview
   accepted = [".mp3"]
   @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
+  @s = File.readlines(File.join "public", "s.txt").map{ |line| line.split}.flatten
+  @c = File.readlines(File.join "public", "c.txt").map{ |line| line.split}.flatten
+  @d = File.readlines(File.join "public", "d.txt").map{ |line| line.split}.flatten
+  @n = File.readlines(File.join "public", "n.txt").map{ |line| line.split}.flatten
+  @@s = @s
+  @@c = @c
+  @@d = @d
+  @@n = @n
+  all = @s+@c+@d+@n
+  @top = []
+  h = Hash.new(0)
+  all.each{|name| h[name] += 1}
+  h.each{|name,count| @top << name if count >= 3}
+
+
   haml :overview
 end
 
@@ -53,22 +84,38 @@ end
 
 post "/update/favs/:who/?" do
   case params[:who]
-  when "c"
-    File.open("public/c.txt", "w") {|f|
-      f << "#{params[:favC].inspect}"
-    }
   when "s"
-    File.open("public/s.txt", "w") {|f|
-      f << "#{params[:favS].inspect}"
-    }
+    if !@@s.include?(params[:favS])
+      File.open("public/s.txt", "a+") {|f|
+        f << params[:favS]+"\n"
+      }
+    else
+      `sed -i '/\\b\\(#{params[:favS]}\\)\\b/d' #{File.join ("public/s.txt")}`
+    end
+  when "c"
+    if !@@c.include?(params[:favC])
+      File.open("public/c.txt", "a+") {|f|
+        f << params[:favC]+"\n"
+      }
+    else
+      `sed -i '/\\b\\(#{params[:favC]}\\)\\b/d' #{File.join ("public/c.txt")}`
+    end
   when "d"
-    File.open("public/d.txt", "w") {|f|
-      f << "#{params[:favD].inspect}"
-    }
+    if !@@d.include?(params[:favD])
+      File.open("public/d.txt", "a+") {|f|
+        f << params[:favD]+"\n"
+      }
+    else
+      `sed -i '/\\b\\(#{params[:favD]}\\)\\b/d' #{File.join ("public/d.txt")}`
+    end
   when "n"
-    File.open("public/n.txt", "w") {|f|
-      f << "#{params[:favN].inspect}"
-    }
+    if !@@n.include?(params[:favN])
+      File.open("public/n.txt", "a+") {|f|
+        f << params[:favN]+"\n"
+      }
+    else
+      `sed -i '/\\b\\(#{params[:favN]}\\)\\b/d' #{File.join ("public/n.txt")}`
+    end
   end
   redirect "/overview"
 end
@@ -78,7 +125,7 @@ post "/update/:record/?" do
     haml :error
   else
     File.open("public/#{params[:record]}", "a+") {|f|
-      f << "- #{params[:comment].inspect}<br>"
+      f << "- #{@@user}: #{params[:comment].inspect}<br>"
     }
     redirect "/overview"
   end

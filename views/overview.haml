@@ -1,55 +1,19 @@
-:javascript
-  function updateC(){
-    var text = "#{File.read File.join "public", "c.txt"}"
-    var x = document.getElementById('textarea#favC').value = text;
-  }
-  function updateS(){
-    var text = "#{File.read File.join "public", "s.txt"}"
-    var x = document.getElementById('textarea#favS').value = text;
-  }
-  function updateD(){
-    var text = "#{File.read File.join "public", "d.txt"}"
-    var x = document.getElementById('textarea#favD').value = text;
-  }
-  function updateN(){
-    var text = "#{File.read File.join "public", "n.txt"}"
-    var x = document.getElementById('textarea#favN').value = text;
-  }
-#div.row
-  #ch.col-xs-3
-    c:
-    - c = File.read File.join "public", "c.txt"
-    %form{:style=>"width:200px;", :action => "/update/favs/c", :method => "post", :onklick=>"updateC()"}
-      %textarea.form-control.input-medium{:name=>"favC", :rows=>"5"} #{c.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-    %button.btn save
-  #sk.col-xs-3
-    s:
-    - s = File.read File.join "public", "s.txt"
-    %form{:style=>"width:200px;", :action => "/update/favs/s", :method => "post", :onklick=>"updateS()"}
-      %textarea.form-control.input-medium{:name=>"favS", :rows=>"5"} #{s.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-    %button.btn save
-  #dg.col-xs-3
-    d:
-    - d = File.read File.join "public", "d.txt"
-    %form{:style=>"width:200px;", :action => "/update/favs/d", :method => "post", :onklick=>"updateD()"}
-      %textarea.form-control.input-medium{:name=>"favD", :rows=>"5"} #{d.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-    %button.btn save
-  #ab.col-xs-3
-    n:
-    - n = File.read File.join "public", "n.txt"
-    %form{:style=>"width:200px;", :action => "/update/favs/n", :method => "post", :onklick=>"updateN()"}
-      %textarea.form-control.input-medium{:name=>"favN", :rows=>"5"} #{n.gsub!("\"", "").gsub!(/\\r\\n/, "&#13;&#10;")}
-    %button.btn save
+#favorites.alert.alert-success
+  %strong Favoriten
+  - @top.each do |fav|
+    %p= fav
 %hr
 - @records.each_with_index do |record, idx|
   #div.well.well-sm{:id=>"#{record.gsub(".mp3","")}"}
     %h3
-      = record
+      = record.gsub(".mp3","")
     %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls", :style=>"float:left;"}
     :javascript
       var audio#{idx} = document.getElementById("player#{idx}");
       audio#{idx}.addEventListener("playing", function() {
         $.each($('audio'), function(){
+          //this.classList.add("alert");
+          //this.classList.add("alert-warning");
           if(this !== audio#{idx}){
             this.pause()
           }
@@ -62,4 +26,11 @@
       })
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
+    - record = record.gsub(".mp3", "")
+    %form.form-inline{:action => "/update/favs/#{@@user}", :method => "post"}
+      %div.form-group
+        %button.btn.form-control{:type=>"submit", :name => "favS", :value => record, :class => [("disabled" if @@user != "s"), (@s.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} s
+        %button.btn.form-control{:type=>"submit", :name => "favC", :value => record, :class => [("disabled" if @@user != "c"), (@c.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} c
+        %button.btn.form-control{:type=>"submit", :name => "favD", :value => record, :class => [("disabled" if @@user != "d"), (@d.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} d
+        %button.btn.form-control{:type=>"submit", :name => "favN", :value => record, :class => [("disabled" if @@user != "n"), (@n.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} n
   %hr
