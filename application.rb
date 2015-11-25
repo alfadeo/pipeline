@@ -20,9 +20,9 @@ get "/?" do
   #redirect "/overview"
 end
 
-get "/overview/?" do
+get "/overview/?:user?/?:div?" do
   if params[:user]
-    @@user = params[:user]
+    @@user = params[:user].gsub("/","")
   elsif @@user
     @@user = @@user
   else
@@ -92,6 +92,7 @@ post "/update/favs/:who/?" do
     else
       `sed -i '/\\b\\(#{params[:favS]}\\)\\b/d' #{File.join ("public/s.txt")}`
     end
+    record = params[:favS]
   when "c"
     if !@@c.include?(params[:favC])
       File.open("public/c.txt", "a+") {|f|
@@ -100,6 +101,7 @@ post "/update/favs/:who/?" do
     else
       `sed -i '/\\b\\(#{params[:favC]}\\)\\b/d' #{File.join ("public/c.txt")}`
     end
+    record = params[:favC]
   when "d"
     if !@@d.include?(params[:favD])
       File.open("public/d.txt", "a+") {|f|
@@ -108,6 +110,7 @@ post "/update/favs/:who/?" do
     else
       `sed -i '/\\b\\(#{params[:favD]}\\)\\b/d' #{File.join ("public/d.txt")}`
     end
+    record = params[:favD]
   when "n"
     if !@@n.include?(params[:favN])
       File.open("public/n.txt", "a+") {|f|
@@ -116,8 +119,10 @@ post "/update/favs/:who/?" do
     else
       `sed -i '/\\b\\(#{params[:favN]}\\)\\b/d' #{File.join ("public/n.txt")}`
     end
+    record = params[:favN]
   end
-  redirect "/overview"
+
+  redirect "/overview?user=#{@@user}/#div_#{record}"
 end
 
 post "/update/:record/?" do
@@ -127,7 +132,7 @@ post "/update/:record/?" do
     File.open("public/#{params[:record]}", "a+") {|f|
       f << "- #{@@user}: #{params[:comment].inspect}<br>"
     }
-    redirect "/overview"
+    redirect "/overview?user=#{@@user}/#div_#{params[:record].gsub(".txt", "")}"
   end
 end
 
