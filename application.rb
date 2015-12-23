@@ -148,7 +148,12 @@ end
 
 # remove from server
 get "/remove/:record/?" do
+  # remove audio file and comments file
   `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
+  # remove from users favs file
+  ["c","s","d","n"].each do |u|
+    `sed -i '/\\b\\(#{params[:record]}\\)\\b/d' #{File.join ("public/#{u}.txt")}`
+  end
   redirect "/overview"
 end
 
