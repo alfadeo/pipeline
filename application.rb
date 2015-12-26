@@ -3,6 +3,8 @@ require "sinatra"
 require "haml"
 require File.join "./auth.rb"
 
+enable :sessions
+
 use Rack::Auth::Basic, "Tell me" do |username, password|
   [username, password] == [$user, $pass]
 end
