@@ -5,9 +5,9 @@ require File.join "./auth.rb"
 
 enable :sessions
 
-use Rack::Auth::Basic, "Tell me" do |username, password|
-  [username, password] == [$user, $pass]
-end
+#use Rack::Auth::Basic, "Tell me" do |username, password|
+#  [username, password] == [$user, $pass]
+#end
 
 set :raise_errors, false
 set :show_exceptions, false
@@ -16,20 +16,39 @@ error do
   redirect to('/')
 end
 
+helpers do
+  def admin?
+    session[:admin] ||= nil
+  end
+
+  def pass?
+    session[:pass] ||= nil
+  end
+
+  def protected!
+    redirect "/login" unless admin? == $user && pass? == $pass
+  end
+end
+
 get "/?" do
-  @@user = "user?"
+  @@user = "?"
   haml :login
-  #redirect "/overview"
+end
+
+get "/login/?" do
+  haml :login
+end
+
+post "/login" do
+  session[:admin] = params[:admin]
+  session[:pass] = params[:pass]
+  session[:user] = params[:user]
+  redirect "/overview"
 end
 
 get "/overview/?:user?/?:div?" do
-  if params[:user]
-    @@user = params[:user].gsub("/","")
-  elsif @@user
-    @@user = @@user
-  else
-    @@user = "user?"
-  end
+  protected!
+  @@user = session[:user]
   # display overview
   accepted = [".mp3"]
   @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
@@ -53,14 +72,17 @@ end
 
 # upload form
 get "/upload/?" do
+  protected!
   haml :upload
 end
 
 get "/links/?" do
+  protected!
   haml :links
 end
 
 post "/links/?" do
+  protected!
   File.open("public/links.txt", "a+") {|f|
     f << "* <a href="+"#{params[:comment].inspect.gsub("\"", "")}"+">#{params[:comment].inspect}</a><br>"
   }
@@ -70,6 +92,7 @@ end
 
 # store file
 post "/upload/?" do
+  protected!
   if !params[:file]
     haml :error
   else
@@ -85,6 +108,7 @@ post "/upload/?" do
 end
 
 post "/update/favs/:who/?" do
+  protected!
   case params[:who]
   when "s"
     if !@@s.include?(params[:favS])
@@ -128,6 +152,7 @@ post "/update/favs/:who/?" do
 end
 
 post "/update/:record/?" do
+  protected!
   if params[:comment] == ""
     haml :error
   else
@@ -140,16 +165,19 @@ end
 
 # get single record
 get "/download/:record/?" do
+  protected!
   send_file File.join(settings.public_folder, "#{params[:record]}")
 end
 
 # delete form
 get "/delete/:record" do
+  protected!
   haml :delete, :locals => {:record => params[:record]}
 end
 
 # remove from server
 get "/remove/:record/?" do
+  protected!
   # remove audio file and comments file
   `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
   # remove from users favs file

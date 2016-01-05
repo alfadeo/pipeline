@@ -2,8 +2,9 @@
   %div.modal-dialog
     %div.modal-content
       %div.modal-body
-        wer bisch du
-        %form{:action=>to("/overview"), :method=>"get"}
+        %form{:action=>to("/login"), :method=>"post"}
+          %input{:type => "text", :name=>"admin"}
+          %input{:type => "password", :name=>"pass"}
           %input.radio-inline{:type=>"radio", :name=>"user", :value=>"s"} s
           %input.radio-inline{:type=>"radio", :name=>"user", :value=>"c"} c
           %input.radio-inline{:type=>"radio", :name=>"user", :value=>"d"} d
