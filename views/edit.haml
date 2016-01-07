@@ -8,7 +8,7 @@
   = @text
   %br
   %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
-    %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{@@user}:"}
+    %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{session[:user]}:"}
     %br  
     %input.btn.btn-default{:id =>"submit_#{idx}", :type=>"submit", :value=>"send", :onclick => "update('#{idx}')" }
     :javascript

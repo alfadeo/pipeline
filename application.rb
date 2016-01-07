@@ -28,10 +28,13 @@ helpers do
   def protected!
     redirect "/login" unless admin? == $user && pass? == $pass
   end
+
+  def userfile(user)
+    File.readlines(File.join "public", user+".txt").map{ |line| line.split}.flatten
+  end
 end
 
 get "/?" do
-  @@user = "?"
   haml :login
 end
 
@@ -40,32 +43,25 @@ get "/login/?" do
 end
 
 post "/login" do
-  session[:admin] = params[:admin]
-  session[:pass] = params[:pass]
-  session[:user] = params[:user]
+  ["admin", "pass", "user"].each do |key|
+    session[key.to_sym] = params[key.to_sym]
+  end
   redirect "/overview"
 end
 
 get "/overview/?:user?/?:div?" do
   protected!
-  @@user = session[:user]
   # display overview
   accepted = [".mp3"]
   @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
-  @s = File.readlines(File.join "public", "s.txt").map{ |line| line.split}.flatten
-  @c = File.readlines(File.join "public", "c.txt").map{ |line| line.split}.flatten
-  @d = File.readlines(File.join "public", "d.txt").map{ |line| line.split}.flatten
-  @n = File.readlines(File.join "public", "n.txt").map{ |line| line.split}.flatten
-  @@s = @s
-  @@c = @c
-  @@d = @d
-  @@n = @n
-  all = @s+@c+@d+@n
+  all = []
+  $users.each do |user|
+    all << userfile(user)
+  end
   @top = []
   h = Hash.new(0)
-  all.each{|name| h[name] += 1}
+  all.flatten.each{|name| h[name] += 1}
   h.each{|name,count| @top << name if count >= 3}
-
 
   haml :overview
 end
@@ -109,46 +105,20 @@ end
 
 post "/update/favs/:who/?" do
   protected!
-  case params[:who]
-  when "s"
-    if !@@s.include?(params[:favS])
-      File.open("public/s.txt", "a+") {|f|
-        f << params[:favS]+"\n"
+  if params[:who]
+    user = params[:who]
+    file = userfile user
+    fav = "fav"+user.capitalize
+    if !file.include?(params[fav.to_sym])
+      File.open("public/"+user+".txt", "a+") {|f|
+        f << params[fav.to_sym]+"\n"
       }
     else
-      `sed -i '/\\b\\(#{params[:favS]}\\)\\b/d' #{File.join ("public/s.txt")}`
+      `sed -i '/\\b\\(#{params[fav.to_sym]}\\)\\b/d' #{File.join ("public/"+user+".txt")}`
     end
-    record = params[:favS]
-  when "c"
-    if !@@c.include?(params[:favC])
-      File.open("public/c.txt", "a+") {|f|
-        f << params[:favC]+"\n"
-      }
-    else
-      `sed -i '/\\b\\(#{params[:favC]}\\)\\b/d' #{File.join ("public/c.txt")}`
-    end
-    record = params[:favC]
-  when "d"
-    if !@@d.include?(params[:favD])
-      File.open("public/d.txt", "a+") {|f|
-        f << params[:favD]+"\n"
-      }
-    else
-      `sed -i '/\\b\\(#{params[:favD]}\\)\\b/d' #{File.join ("public/d.txt")}`
-    end
-    record = params[:favD]
-  when "n"
-    if !@@n.include?(params[:favN])
-      File.open("public/n.txt", "a+") {|f|
-        f << params[:favN]+"\n"
-      }
-    else
-      `sed -i '/\\b\\(#{params[:favN]}\\)\\b/d' #{File.join ("public/n.txt")}`
-    end
-    record = params[:favN]
+    record = params[fav.to_sym]
   end
-
-  redirect "/overview?user=#{@@user}/#div_#{record}"
+  redirect "/overview?user=#{session[:user]}/#div_#{record}"
 end
 
 post "/update/:record/?" do
@@ -157,9 +127,9 @@ post "/update/:record/?" do
     haml :error
   else
     File.open("public/#{params[:record]}", "a+") {|f|
-      f << "- #{@@user}: #{params[:comment].inspect}<br>"
+      f << "- #{session[:user]}: #{params[:comment].inspect}<br>"
     }
-    redirect "/overview?user=#{@@user}/#div_#{params[:record].gsub(".txt", "")}"
+    redirect "/overview?user=#{session[:user]}/#div_#{params[:record].gsub(".txt", "")}"
   end
 end
 
@@ -181,8 +151,8 @@ get "/remove/:record/?" do
   # remove audio file and comments file
   `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
   # remove from users favs file
-  ["c","s","d","n"].each do |u|
-    `sed -i '/\\b\\(#{params[:record]}\\)\\b/d' #{File.join ("public/#{u}.txt")}`
+  $users.each do |user|
+    `sed -i '/\\b\\(#{params[:record].sub(".mp3", "")}\\)\\b/d' #{File.join("public/"+user+".txt")}`
   end
   redirect "/overview"
 end

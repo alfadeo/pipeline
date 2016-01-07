@@ -31,7 +31,7 @@
             %a{ :href => "/links" , :style=>"text-decoration:none;" } links
           %li
             %a{ :href => "/" , :style=>"text-decoration:none;" }
-              = "user: "+@@user
+              = "user: "+ (session[:user] ? session[:user] : "?")
     %div.container-fluid
       = yield
   

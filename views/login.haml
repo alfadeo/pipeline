@@ -5,9 +5,9 @@
         %form{:action=>to("/login"), :method=>"post"}
           %input{:type => "text", :name=>"admin"}
           %input{:type => "password", :name=>"pass"}
-          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"s"} s
-          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"c"} c
-          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"d"} d
-          %input.radio-inline{:type=>"radio", :name=>"user", :value=>"n"} n
+          %hr
+          - $users.each do |user|
+            %input.radio-inline{:type=>"radio", :name=>"user", :value=>user} 
+              = user
           %hr
           %input.radio{:type=>"submit", :value=>"OK"}

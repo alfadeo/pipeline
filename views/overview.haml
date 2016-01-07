@@ -27,10 +27,10 @@
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
     - record = record.gsub(".mp3", "")
-    %form.form-inline{:action => "/update/favs/#{@@user}", :method => "post"}
+    %form.form-inline{:action => "/update/favs/#{session[:user]}", :method => "post"}
       %div.form-group
-        %button.btn.form-control{:type=>"submit", :name => "favS", :value => record, :class => [("disabled" if @@user != "s"), (@s.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} s
-        %button.btn.form-control{:type=>"submit", :name => "favC", :value => record, :class => [("disabled" if @@user != "c"), (@c.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} c
-        %button.btn.form-control{:type=>"submit", :name => "favD", :value => record, :class => [("disabled" if @@user != "d"), (@d.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} d
-        %button.btn.form-control{:type=>"submit", :name => "favN", :value => record, :class => [("disabled" if @@user != "n"), (@n.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} n
+        - $users.each do |user|
+          - favs = userfile(user)
+          %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} 
+            = user
   %hr
