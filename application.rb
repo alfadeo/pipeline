@@ -32,6 +32,10 @@ helpers do
   def userfile(user)
     File.readlines(File.join "public", user+".txt").map{ |line| line.split}.flatten
   end
+
+  def comments(track)
+    File.readlines(File.join "public", track+".txt").map{ |line| line}.compact
+  end
 end
 
 get "/?" do
@@ -123,12 +127,17 @@ end
 
 post "/update/:record/?" do
   protected!
-  if params[:comment] == ""
+  if !params[:comment] && !params[:rmcomment]
     haml :error
   else
-    File.open("public/#{params[:record]}", "a+") {|f|
-      f << "- #{session[:user]}: #{params[:comment].inspect}<br>"
-    }
+    if params[:comment]
+      File.open("public/#{params[:record]}", "a+") {|f|
+        f << session[:user]+": "+params[:comment].gsub(/\r\n?/, "")+"\n"
+      }
+    end
+    if params[:rmcomment]
+      `sed -i '/\\b\\(#{params[:rmcomment]}\\)\\b/d' #{File.join("public/#{params[:record]}")}`
+    end
     redirect "/overview?user=#{session[:user]}/#div_#{params[:record].gsub(".txt", "")}"
   end
 end

@@ -8,6 +8,7 @@
     %h3
       = record.gsub(".mp3","")
     %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls", :style=>"float:left;"}
+    //TODO enable start at time by comment  
     :javascript
       var audio#{idx} = document.getElementById("player#{idx}");
       audio#{idx}.addEventListener("playing", function() {
@@ -31,6 +32,6 @@
       %div.form-group
         - $users.each do |user|
           - favs = userfile(user)
-          %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")]} 
+          %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")], :style=>"margin-top:10px;"} 
             = user
   %hr

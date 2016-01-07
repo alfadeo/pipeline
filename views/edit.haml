@@ -1,15 +1,24 @@
 - @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
-- @text.gsub!(/\\r\\n/, "<br>")
 - @id = locals[:record].gsub(".mp3", "")
 - idx = locals[:idx]
 %button.btn.btn-default.btn-sm{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}} more
 %br
 #text.collapse{:id=>"#{idx}"}
-  = @text
+  %p= comments(@id).first
+  %ul{:style=>"list-style:none;padding:0px;"}
+  - comments(@id).drop(1).each do |line|
+    - from = line.split(":").first+":"
+    %li.well{:style=>"list-style:none;margin:0px;margin-top:10px;"}
+      %div.badge{:style=>"float:left;margin-right:5px;display:table-cell;"}= from
+      %div{:style=>"display:table-cell;"}
+        %p= line.split(":").last
+      - if from =~ /#{session[:user]}/
+        %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
+          %input{:type=>"hidden", :name=>"rmcomment", :value=>"#{line}"}
+          %input.btn.btn-default.btn-sm{:type=>"submit", :value=>"remove"}
   %br
   %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
-    %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{session[:user]}:"}
-    %br  
+    %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{session[:user]}:", :style=>"margin-bottom:10px;"}
     %input.btn.btn-default{:id =>"submit_#{idx}", :type=>"submit", :value=>"send", :onclick => "update('#{idx}')" }
     :javascript
       function update(idx){
