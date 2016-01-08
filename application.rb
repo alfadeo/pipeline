@@ -36,6 +36,10 @@ helpers do
   def comments(track)
     File.readlines(File.join "public", track+".txt").map{ |line| line}.compact
   end
+
+  def timelink(time, id)
+    str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
+  end
 end
 
 get "/?" do
@@ -132,7 +136,7 @@ post "/update/:record/?" do
   else
     if params[:comment]
       File.open("public/#{params[:record]}", "a+") {|f|
-        f << session[:user]+": "+params[:comment].gsub(/\r\n?/, "")+"\n"
+        f << session[:user]+"# "+params[:comment].gsub(/\r\n?/, "")+"\n"
       }
     end
     if params[:rmcomment]

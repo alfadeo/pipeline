@@ -7,11 +7,15 @@
   %p= comments(@id).first
   %ul{:style=>"list-style:none;padding:0px;"}
   - comments(@id).drop(1).each do |line|
-    - from = line.split(":").first+":"
+    - from = line.split("#").first+":"
     %li.well{:style=>"list-style:none;margin:0px;margin-top:10px;"}
       %div.badge{:style=>"float:left;margin-right:5px;display:table-cell;"}= from
       %div{:style=>"display:table-cell;"}
-        %p= line.split(":").last
+        - time = Regexp.new(/(\d{1,2}:\d{2})/)
+        - text = line.split("#").last
+        - times = text.scan(/#{time}/).flatten.compact
+        - times.each{|t| text.gsub!(t, timelink(t, idx))} if times.size > 0
+        %p= text
       - if from =~ /#{session[:user]}/
         %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
           %input{:type=>"hidden", :name=>"rmcomment", :value=>"#{line}"}
@@ -26,6 +30,18 @@
         var y = document.getElementById(idx);
         y.innerHTML = y.innerHTML + '- "' + x + '"<br>' 
       }
+      function trackTime(time, idx){
+        id = "player"+idx;
+        ms = time.split(':');
+        sec = (+ms[0])*60+(+ms[1]);
+        document.getElementById(id).play();
+        document.getElementById(id).currentTime=(+sec);
+      }
+      $("a[rel^='like{{#{idx}}}']").click(function(){
+        var para1 = this.dataset['para1'];
+        var para2 = this.dataset['para2'];
+        trackTime(para1, para2);
+      });
     #delete.btn.btn-default{:style=>"display:inline;margin-right:1em;"}
       %a{ :href=>"#{to("/delete/#{locals[:record]}")}", :style=>"text-decoration:none;"}
         delete
