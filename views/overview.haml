@@ -5,33 +5,44 @@
 %hr
 - @records.each_with_index do |record, idx|
   #div.well.well-sm{:id=>"#{record.gsub(".mp3","")}"}
-    %h3
+    -#- if played?(record, session[:user])
+      %span.label.label-success.label-as-badge
+        %span.glyphicon.glyphicon-record
+    -#- else
+      %span.label.label-danger.label-as-badge
+        %span.glyphicon.glyphicon-record
+    %h3{:style=>"display:block;"}
       = record.gsub(".mp3","")
     %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls", :style=>"float:left;"}
-    //TODO enable start at time by comment  
     :javascript
       var audio#{idx} = document.getElementById("player#{idx}");
       audio#{idx}.addEventListener("playing", function() {
+        //TODO add track to user_played file
         $.each($('audio'), function(){
-          //this.classList.add("alert");
-          //this.classList.add("alert-warning");
           if(this !== audio#{idx}){
             this.pause()
           }
         })
       })
       audio#{idx}.addEventListener("ended", function() {
-        //audio = document.getElementById("player#{idx+1}");
         audio#{idx+1}.play();
         document.getElementById("player#{idx+1}").focus();
       })
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
-    - record = record.gsub(".mp3", "")
-    %form.form-inline{:action => "/update/favs/#{session[:user]}", :method => "post"}
-      %div.form-group
-        - $users.each do |user|
-          - favs = userfile(user)
-          %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")], :style=>"margin-top:10px;"} 
-            = user
+    %div.row
+      - record = record.gsub(".mp3", "")
+      %form.form-inline{:action => "/update/favs/#{session[:user]}", :method => "post"}
+        %div.form-group
+          - $users.each do |user|
+            - favs = userfile(user)
+            %div.col-sm-2
+              %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")], :style=>"margin-top:10px;"} 
+                = user
+      #delete.col-sm-1.btn.btn-default{:style=>"display:inline;margin:1em;"}
+        %a{ :href=>"#{to("/delete/#{record}")}", :style=>"text-decoration:none;"}
+          delete
+      #download.col-sm-1.btn.btn-default{:style=>"display:inline;text-decoration:none;margin:1em;"}
+        %a{ :href=>"#{to("/download/#{record}")}", :style=>"text-decoration:none;"}
+          download
   %hr

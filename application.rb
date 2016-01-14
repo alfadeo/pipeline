@@ -40,6 +40,11 @@ helpers do
   def timelink(time, id)
     str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
   end
+
+  def played?(record, user)
+    arr = File.readlines(File.join "public", user+"_played.txt").map{ |line| line.split}.flatten
+    arr.include?(record) ? true : false
+  end
 end
 
 get "/?" do
@@ -169,4 +174,14 @@ get "/remove/:record/?" do
   end
   redirect "/overview"
 end
-
+=begin
+put "/:record/played/?" do
+  protected!
+  if params[:record]
+    File.open("public/#{session[:user]}_played/#{params[:record]}", "a+") {|f|
+      f << params[:record]+"\n"
+      #f << session[:user]+"# "+params[:comment].gsub(/\r\n?/, "")+"\n"
+    }
+  end
+end
+=end

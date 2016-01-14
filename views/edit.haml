@@ -1,14 +1,16 @@
 - @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
 - @id = locals[:record].gsub(".mp3", "")
 - idx = locals[:idx]
-%button.btn.btn-default.btn-sm{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}} more
+%button.btn.btn-default.btn-sm{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:10px;"} comments
+%span.badge.badge-notify{:style=>"position:relative;right:-10px;background-color:red;"}
+  = comments(@id).drop(1).size
 %br
 #text.collapse{:id=>"#{idx}"}
   %p= comments(@id).first
   %ul{:style=>"list-style:none;padding:0px;"}
   - comments(@id).drop(1).each do |line|
     - from = line.split("#").first+":"
-    %li.well{:style=>"list-style:none;margin:0px;margin-top:10px;"}
+    %li.well{:style=>"list-style:none;margin:0px;padding:10px;"}
       %div.badge{:style=>"float:left;margin-right:5px;display:table-cell;"}= from
       %div{:style=>"display:table-cell;"}
         - time = Regexp.new(/(\d{1,2}:\d{2})/)
@@ -42,9 +44,3 @@
         var para2 = this.dataset['para2'];
         trackTime(para1, para2);
       });
-    #delete.btn.btn-default{:style=>"display:inline;margin-right:1em;"}
-      %a{ :href=>"#{to("/delete/#{locals[:record]}")}", :style=>"text-decoration:none;"}
-        delete
-    #download.btn.btn-default{:style=>"display:inline;text-decoration:none;margin-right:1em;"}
-      %a{ :href=>"#{to("/download/#{locals[:record]}")}", :style=>"text-decoration:none;"}
-        download
