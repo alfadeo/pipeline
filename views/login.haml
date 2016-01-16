@@ -3,7 +3,7 @@
     %div.modal-content
       %div.modal-body
         %form{:action=>to("/login"), :method=>"post"}
-          %input{:type => "text", :name=>"admin"}
+          %input{:type => "text", :name=>"admin", :autofocus=>"true"}
           %input{:type => "password", :name=>"pass"}
           %hr
           - $users.each do |user|

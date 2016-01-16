@@ -37,6 +37,10 @@ helpers do
     File.readlines(File.join "public", track+".txt").map{ |line| line}.compact
   end
 
+  def links
+    File.readlines(File.join "public/links.txt").map{ |line| line.gsub("\n","")}.compact
+  end
+
   def timelink(time, id)
     str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
   end
@@ -93,7 +97,7 @@ end
 post "/links/?" do
   protected!
   File.open("public/links.txt", "a+") {|f|
-    f << "* <a href="+"#{params[:comment].inspect.gsub("\"", "")}"+">#{params[:comment].inspect}</a><br>"
+    f << "<a href=\"#{params[:comment]}\">"+(params[:title] ? params[:title] : params[:comment])+"</a>"+"\n"
   }
 
   redirect "/links"
@@ -161,6 +165,12 @@ end
 get "/delete/:record" do
   protected!
   haml :delete, :locals => {:record => params[:record]}
+end
+
+get "/delete/link/:link" do
+  protected!
+  `sed -i '#{params[:link].to_i}d' #{File.join("public/links.txt")}`
+  redirect "/links"
 end
 
 # remove from server
