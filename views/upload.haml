@@ -1,5 +1,5 @@
 %h3
-  upload(mp3):
+  upload(mp3|wav):
 
 %form.well{:action=>"/upload", :method=>"post", :type=>"file", :enctype=>'multipart/form-data'}
   %input{:type=>'file', :name=>'file', :accept=>"audio/*"}

@@ -4,7 +4,7 @@
     %p= fav
 %hr
 - @records.each_with_index do |record, idx|
-  #div.well.well-sm{:id=>"#{record.gsub(".mp3","")}"}
+  #div.well.well-sm{:id=>"#{record.gsub(/\.mp3|\.wav/,"")}"}
     -#- if played?(record, session[:user])
       %span.label.label-success.label-as-badge
         %span.glyphicon.glyphicon-record
@@ -12,7 +12,7 @@
       %span.label.label-danger.label-as-badge
         %span.glyphicon.glyphicon-record
     %h3{:style=>"display:block;"}
-      = record.gsub(".mp3","")
+      = record.gsub(/\.mp3|\.wav/,"")
     %audio{ :src=>"#{record}", :id=>"player#{idx}", :controls=>"controls", :style=>"float:left;"}
     :javascript
       var audio#{idx} = document.getElementById("player#{idx}");
@@ -31,7 +31,7 @@
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
     %div.row
-      - record = record.gsub(".mp3", "")
+      - record = record.gsub(/\.mp3|\.wav/, "")
       %form.form-inline{:action => "/update/favs/#{session[:user]}", :method => "post"}
         %div.form-group
           - $users.each do |user|

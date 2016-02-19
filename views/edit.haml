@@ -1,5 +1,5 @@
-- @text = File.read File.join "public", locals[:record].gsub(".mp3", ".txt")
-- @id = locals[:record].gsub(".mp3", "")
+- @text = File.read File.join "public", locals[:record].gsub(/\.mp3|\.wav/, ".txt")
+- @id = locals[:record].gsub(/\.mp3|\.wav/, "")
 - idx = locals[:idx]
 %button.btn.btn-default.btn-sm{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:10px;"} comments
 %span.badge.badge-notify{:style=>"position:relative;right:-10px;background-color:red;"}
@@ -19,11 +19,11 @@
         - times.each{|t| text.gsub!(t, timelink(t, idx))} if times.size > 0
         %p= text
       - if from =~ /#{session[:user]}/
-        %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
+        %form{:action => "/update/#{locals[:record].gsub(/\.mp3|\.wav/, ".txt")}", :method => "post"}
           %input{:type=>"hidden", :name=>"rmcomment", :value=>"#{line}"}
           %input.btn.btn-default.btn-sm{:type=>"submit", :value=>"remove"}
   %br
-  %form{:action => "/update/#{locals[:record].gsub(".mp3", ".txt")}", :method => "post"}
+  %form{:action => "/update/#{locals[:record].gsub(/\.mp3|\.wav/, ".txt")}", :method => "post"}
     %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{session[:user]}:", :style=>"margin-bottom:10px;"}
     %input.btn.btn-default{:id =>"submit_#{idx}", :type=>"submit", :value=>"send", :onclick => "update('#{idx}')" }
     :javascript

@@ -69,7 +69,7 @@ end
 get "/overview/?:user?/?:div?" do
   protected!
   # display overview
-  accepted = [".mp3"]
+  accepted = [".mp3", ".wav"]
   @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
   all = []
   $users.each do |user|
@@ -112,7 +112,7 @@ post "/upload/?" do
     File.open("public/" + params['file'][:filename], "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
-    File.open("public/" + params['file'][:filename].gsub(".mp3", "") + ".txt", "w+") do |d|
+    File.open("public/" + params['file'][:filename].gsub(/\.mp3|\.wav/, "") + ".txt", "w+") do |d|
       d.write("uploaded: #{Time.now.ctime}\n")
     end
 
@@ -177,10 +177,10 @@ end
 get "/remove/:record/?" do
   protected!
   # remove audio file and comments file
-  `rm public/#{params[:record]} && rm public/#{params[:record].gsub(".mp3", ".txt")}`
+  `rm public/#{params[:record]} && rm public/#{params[:record].gsub(/\.mp3|\.wav/, ".txt")}`
   # remove from users favs file
   $users.each do |user|
-    `sed -i '/\\b\\(#{params[:record].sub(".mp3", "")}\\)\\b/d' #{File.join("public/"+user+".txt")}`
+    `sed -i '/\\b\\(#{params[:record].sub(/\.mp3|\.wav/, "")}\\)\\b/d' #{File.join("public/"+user+".txt")}`
   end
   redirect "/overview"
 end
