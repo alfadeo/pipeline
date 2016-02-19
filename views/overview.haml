@@ -31,13 +31,13 @@
 
     = haml :edit, :locals => {:record => "#{record}", :idx => idx}
     %div.row
-      - record = record.gsub(/\.mp3|\.wav/, "")
+      - recordname = record.gsub(/\.mp3|\.wav/, "")
       %form.form-inline{:action => "/update/favs/#{session[:user]}", :method => "post"}
         %div.form-group
           - $users.each do |user|
             - favs = userfile(user)
             %div.col-sm-2
-              %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => record, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-primary")], :style=>"margin-top:10px;"} 
+              %button.btn.form-control{:type=>"submit", :name => "fav"+user.capitalize, :value => recordname, :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{recordname})\b/ ? "btn-warning" : "btn-primary")], :style=>"margin-top:10px;"} 
                 = user
       #delete.col-sm-1.btn.btn-default{:style=>"display:inline;margin:1em;"}
         %a{ :href=>"#{to("/delete/#{record}")}", :style=>"text-decoration:none;"}
