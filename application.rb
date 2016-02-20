@@ -45,10 +45,6 @@ helpers do
     str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
   end
 
-  def played?(record, user)
-    arr = File.readlines(File.join "public", user+"_played.txt").map{ |line| line.split}.flatten
-    arr.include?(record) ? true : false
-  end
 end
 
 get "/?" do
@@ -109,10 +105,10 @@ post "/upload/?" do
   if !params[:file]
     haml :error
   else
-    File.open("public/" + params['file'][:filename], "w+") do |f|
+    File.open("public/" + params['file'][:filename].gsub(/\s+/, "_"), "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
-    File.open("public/" + params['file'][:filename].gsub(/\.mp3|\.wav/, "") + ".txt", "w+") do |d|
+    File.open("public/" + params['file'][:filename].gsub(/\s+/, "_").gsub(/\.mp3|\.wav/, "") + ".txt", "w+") do |d|
       d.write("uploaded: #{Time.now.ctime}\n")
     end
 
@@ -184,14 +180,3 @@ get "/remove/:record/?" do
   end
   redirect "/overview"
 end
-=begin
-put "/:record/played/?" do
-  protected!
-  if params[:record]
-    File.open("public/#{session[:user]}_played/#{params[:record]}", "a+") {|f|
-      f << params[:record]+"\n"
-      #f << session[:user]+"# "+params[:comment].gsub(/\r\n?/, "")+"\n"
-    }
-  end
-end
-=end
