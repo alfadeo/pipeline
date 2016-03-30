@@ -7,7 +7,8 @@
   #div.well.well-sm{:id=>"#{record.gsub(/\.mp3|\.wav/,"")}"}
     %h3{:style=>"display:block;"}
       = record.gsub(/\.mp3|\.wav/,"")
-    %audio{ :src=>"#{record}", :type=>(record =~ /wav$/ ? "audio/wav" : "audio/mpeg"), :id=>"player#{idx}", :controls=>"controls"}
+    %audio{:id=>"player#{idx}", controls: true, preload: false}
+      %source{:src=>"#{record}", :type=>(record =~ /wav$/ ? "audio/wav" : "audio/mpeg")}
     :javascript
       var audio#{idx} = document.getElementById("player#{idx}");
       audio#{idx}.addEventListener("playing", function() {
