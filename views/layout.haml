@@ -7,31 +7,41 @@
     %meta{:name => "description", :content => "Electronic Music"}
     %script{:src=>"/js/jquery-1.11.2.min.js", :type=>"text/javascript"}
     %script{:src=>"/js/bootstrap.min.js", :type=>"text/javascript"}
+    %script{:src=>"/js/wavesurfer.min.js", :type=>"text/javascript"}
     %link{:href=>"/css/bootstrap.min.css", :rel=>"stylesheet"}
     %link{:href=>"/css/offcanvas.css", :rel=>"stylesheet"}
+    %link{:href=>"/css/style.css", :rel=>"stylesheet"}
 
     %title alfadeo pipeline
     
   %body{:style=>"background-color:#EFEFEF;"}
-    %nav{:class=>"navbar navbar-fixed-top navbar-inverse"}
+    %nav.navbar.navbar-fixed-top.navbar-inverse
       %div.container-fluid
-        %div{:class=>"navbar-header"}
+        %div.navbar-header
           %button{:class=>"navbar-toggle collapsed", :aria=>{:controls=>"navbar", :expanded=>"false"}, :data=>{:target=>"#navbar", :toggle=>"collapse"}}
             %span{:class=>"sr-only"} Toggle navigation
             %span{:class=>"icon-bar"}
             %span{:class=>"icon-bar"}
             %span{:class=>"icon-bar"}
       %div{:id=>"navbar", :class=>"navbar-collapse collapse", :aria=>{:expanded=>"false"}, :style=>"height: 1px;"} 
-        %ul{:class => "nav navbar-nav"}
+        %ul.nav.navbar-nav
           %li{:class => ("selected" if /overview|\/$/ =~ request.path) }
-            %a{ :href => "/overview" , :style=>"text-decoration:none;" } overview
+            %a{ :href => "/overview"}
+              %span.white.glyphicon.glyphicon-list-alt
+                overview
           %li{:class => ("selected" if /upload|\/$/ =~ request.path)}
-            %a{ :href => "/upload" , :style=>"text-decoration:none;" } upload
+            %a{ :href => "/upload"}
+              %span.white.glyphicon.glyphicon-upload
+                upload
           %li{:class => ("selected" if /links|\/$/ =~ request.path)}
-            %a{ :href => "/links" , :style=>"text-decoration:none;" } links
+            %a{ :href => "/links"}
+              %span.white.glyphicon.glyphicon-eye-open
+                links
+        %ul.nav.navbar-nav.navbar-right{:style=>"margin-right:1em;"}
           %li
-            %a{ :href => "/" , :style=>"text-decoration:none;" }
-              = "user: "+ (session[:user] ? session[:user] : "?")
+            %a{ :href => "/" }
+              = "#{(session[:user] ? session[:user] : "???")}"
+              %span.white.glyphicon.glyphicon-user
     %div.container-fluid
       = yield
   

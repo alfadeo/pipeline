@@ -1,9 +1,10 @@
 - @text = File.read File.join "public", locals[:record].gsub(/\.mp3|\.wav/, ".txt")
 - @id = locals[:record].gsub(/\.mp3|\.wav/, "")
 - idx = locals[:idx]
-%button.btn.btn-default.btn-sm{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:10px;"} comments
-%span.badge.badge-notify{:style=>"position:relative;right:-10px;background-color:red;"}
-  = comments(@id).drop(1).size
+%button.btn.btn-default{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:20px;"}
+  %span.glyphicon.glyphicon-option-horizontal
+  %span.badge.badge-notify{:style=>"position:relative;background-color:red;"}
+    = comments(@id).drop(1).size
 %br
 #text.collapse{:id=>"#{idx}"}
   %p= comments(@id).first

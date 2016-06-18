@@ -1,6 +1,8 @@
 require "rubygems"
 require "sinatra"
 require "haml"
+require "json"
+
 require File.join "./auth.rb"
 
 enable :sessions
@@ -9,8 +11,8 @@ enable :sessions
 #  [username, password] == [$user, $pass]
 #end
 
-set :raise_errors, false
-set :show_exceptions, false
+#set :raise_errors, false
+#set :show_exceptions, false
 
 error do
   redirect to('/')
@@ -43,6 +45,12 @@ helpers do
 
   def timelink(time, id)
     str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
+  end
+
+  def wavepeaks(track)
+    file = File.read(File.join "public", track+".json")
+    data_hash = JSON.parse(file)
+    data_hash["data"]
   end
 
 end

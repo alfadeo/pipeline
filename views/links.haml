@@ -1,12 +1,13 @@
 %div.well
-  - links.each.with_index do |link, idx|
-    %a.badge{:href=>"/delete/link/#{idx+1}", :style=>"float:left;margin-right:1em;"} x
-    %p= link
-
-  %hr
   %form{:name => "form", :action => to('/links'), :method => "post", :enctype => "multipart/form-data" }
     %input{:type=>"text", :name=>"comment", :placeholder=>"link:", :size=>"80", :style=>"margin:10px 0px 10px 0px;" }
     %br
     %input{:type=>"text", :name=>"title", :placeholder=>"description (not required):", :size=>"30" }
     %br
     %button{:id=>"submit", :style=>"margin:10px 0px 10px 0px;"} save
+  %hr
+  - links.each.with_index do |link, idx|
+    %a.btn.btn-default{:href=>"/delete/link/#{idx+1}", :style=>"float:left;margin-right:1em;"}
+      %span.glyphicon.glyphicon-trash
+    %p= link
+    %br
