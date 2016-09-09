@@ -1,9 +1,3 @@
-#favorites.alert.alert-success
-  %strong Favoriten
-  - @top.each do |fav|
-    %p{:style=>"cursor:pointer;", :onclick=>"focusTrack(\"div_#{fav}\")"}
-      = fav
-
 %hr
 :javascript
   var all = [];

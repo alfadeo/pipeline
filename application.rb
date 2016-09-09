@@ -14,6 +14,10 @@ enable :sessions
 #set :raise_errors, false
 #set :show_exceptions, false
 
+configure :development do
+  $logger = Logger.new(STDOUT)
+end
+
 error do
   redirect to('/')
 end
@@ -52,7 +56,12 @@ helpers do
     data_hash = JSON.parse(file)
     data_hash["data"]
   end
-
+  
+  def to_mp3(track)
+    i = File.join "public", track
+    o = File.join "public", track.gsub(".wav", ".mp3")
+    `lame -h -b 256 #{i} #{o}`
+  end
 end
 
 get "/?" do
@@ -73,7 +82,8 @@ end
 get "/overview/?:user?/?:div?" do
   protected!
   # display overview
-  accepted = [".mp3", ".wav"]
+  #accepted = [".mp3", ".wav"]
+  accepted = [".mp3"]
   @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
   all = []
   $users.each do |user|
@@ -98,6 +108,15 @@ get "/links/?" do
   haml :links
 end
 
+["s", "c", "d", "n"].each do |path|
+  get "/#{path}/?" do
+    protected!
+    @records = []
+    userfile(path).each{|r| @records << r+".mp3"}
+    haml path.to_sym
+  end
+end
+
 post "/links/?" do
   protected!
   File.open("public/links.txt", "a+") {|f|
@@ -113,14 +132,31 @@ post "/upload/?" do
   if !params[:file]
     haml :error
   else
+    if params['file'][:filename] =~ /$.wav/
+      params['file'].to_mp3
+    end
     File.open("public/" + params['file'][:filename].gsub(/\s+/, "_"), "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
     File.open("public/" + params['file'][:filename].gsub(/\s+/, "_").gsub(/\.mp3|\.wav/, "") + ".txt", "w+") do |d|
       d.write("uploaded: #{Time.now.ctime}\n")
     end
-
+    
     redirect "/overview"
+  end
+end
+
+get "/favs/:who/:track?" do
+  protected!
+  if params[:who]
+    user = params[:who]
+    track = params[:track]
+    file = userfile user
+    if !file.include?(params["track"])
+      return "true"
+    else
+      return "false"
+    end
   end
 end
 
@@ -129,17 +165,16 @@ post "/update/favs/:who/?" do
   if params[:who]
     user = params[:who]
     file = userfile user
-    fav = "fav"+user.capitalize
-    if !file.include?(params[fav.to_sym])
+    if !file.include?(params["fav"])
       File.open("public/"+user+".txt", "a+") {|f|
-        f << params[fav.to_sym]+"\n"
+        f << params["fav"]+"\n"
       }
     else
-      `sed -i '/\\b\\(#{params[fav.to_sym]}\\)\\b/d' #{File.join ("public/"+user+".txt")}`
+      `sed -i '/\\b\\(#{params["fav"]}\\)\\b/d' #{File.join ("public/"+user+".txt")}`
     end
-    record = params[fav.to_sym]
+    #record = params[fav.to_sym]
   end
-  redirect "/overview?user=#{session[:user]}/#div_#{record}"
+  #redirect "/overview?user=#{session[:user]}/#div_#{record}"
 end
 
 post "/update/:record/?" do
@@ -186,5 +221,5 @@ get "/remove/:record/?" do
   $users.each do |user|
     `sed -i '/\\b\\(#{params[:record].sub(/\.mp3|\.wav/, "")}\\)\\b/d' #{File.join("public/"+user+".txt")}`
   end
-  redirect "/overview"
+  #redirect "/overview"
 end

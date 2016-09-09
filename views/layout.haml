@@ -37,6 +37,20 @@
             %a{ :href => "/links"}
               %span.white.glyphicon.glyphicon-eye-open
                 links
+          %li.dropdown
+            %a.dropdown-toggle{:type=>"button", :id=>"menu1", :data=>{:toggle=>"dropdown"}, :style=>"color:white;cursor:pointer;"}
+              User Favs
+              %span.white.caret
+            %ul.dropdown-menu{:role=>"menu", :aria=>{:labelledby=>"menu1"}}
+              %li{:role=>"presentation"}
+                %a{:role=>"menuitem", :tabindex=>"-1", :href=>"/s"} S
+              %li{:role=>"presentation"}
+                %a{:role=>"menuitem", :tabindex=>"-1", :href=>"/c"} C
+              %li{:role=>"presentation"}
+                %a{:role=>"menuitem", :tabindex=>"-1", :href=>"/d"} D
+              %li{:role=>"presentation"}
+                %a{:role=>"menuitem", :tabindex=>"-1", :href=>"/n"} N
+
         %ul.nav.navbar-nav.navbar-right{:style=>"margin-right:1em;"}
           %li
             %a{ :href => "/" }
@@ -44,4 +58,44 @@
               %span.white.glyphicon.glyphicon-user
     %div.container-fluid
       = yield
+    #current-track{:style => "z-index:100;position:fixed;bottom:10px;right:50px;cursor:pointer;"}
+      %span.glyphicon.glyphicon-bullhorn
+    #back-top{:style => "z-index:100;position:fixed;bottom:10px;right:10px;cursor:pointer;"}
+      %span.glyphicon.glyphicon-circle-arrow-up{:style => "font-size:2em;color:orange;"}
+
+    :javascript
+      $("#current-track").hide();
+      $(function () {
+        $(window).scroll(function () {
+          if ( active !== "") {
+            $('#current-track').fadeIn();
+          } else {
+            $('#current-track').fadeOut();
+          }
+        });
+        // scroll body to 0px on click
+        $('#current-track').click(function () {
+          $('body,html').animate({
+            scrollTop: $(active).offset().top -300
+          }, 500);
+          return false;
+        });
+      });
+      $("#back-top").hide();
+      $(function () {
+        $(window).scroll(function () {
+          if ($(this).scrollTop() > 1000) {
+            $('#back-top').fadeIn();
+          } else {
+            $('#back-top').fadeOut();
+          }
+        });
+        // scroll body to 0px on click
+        $('#back-top').click(function () {
+          $('body,html').animate({
+            scrollTop: 0
+          }, 500);
+          return false;
+        });
+      });
   
