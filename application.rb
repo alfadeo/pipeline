@@ -1,12 +1,15 @@
 require "rubygems"
 require "sinatra"
+require "sinatra/reloader"
 require "haml"
 require "json"
-
+require 'mongoid'
 require File.join "./auth.rb"
+require File.join "./helper.rb"
 
 enable :sessions
-
+enable :reloader
+also_reload File.join "./helper.rb"
 #use Rack::Auth::Basic, "Tell me" do |username, password|
 #  [username, password] == [$user, $pass]
 #end
@@ -20,48 +23,6 @@ end
 
 error do
   redirect to('/')
-end
-
-helpers do
-  def admin?
-    session[:admin] ||= nil
-  end
-
-  def pass?
-    session[:pass] ||= nil
-  end
-
-  def protected!
-    redirect "/login" unless admin? == $user && pass? == $pass
-  end
-
-  def userfile(user)
-    File.readlines(File.join "public", user+".txt").map{ |line| line.split}.flatten
-  end
-
-  def comments(track)
-    File.readlines(File.join "public", track+".txt").map{ |line| line}.compact
-  end
-
-  def links
-    File.readlines(File.join "public/links.txt").map{ |line| line.gsub("\n","")}.compact
-  end
-
-  def timelink(time, id)
-    str = "<a href=\"javascript:void(null);\" rel=\"like{{#{id}}}\" data-para1=\"#{time}\" data-para2=\"#{id}\">#{time}</a>"
-  end
-
-  def wavepeaks(track)
-    file = File.read(File.join "public", track+".json")
-    data_hash = JSON.parse(file)
-    data_hash["data"]
-  end
-  
-  def to_mp3(track)
-    i = File.join "public", track
-    o = File.join "public", track.gsub(".wav", ".mp3")
-    `lame -h -b 256 #{i} #{o}`
-  end
 end
 
 get "/?" do
@@ -83,17 +44,19 @@ get "/overview/?:user?/?:div?" do
   protected!
   # display overview
   #accepted = [".mp3", ".wav"]
-  accepted = [".mp3"]
-  @records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
-  all = []
-  $users.each do |user|
-    all << userfile(user)
-  end
-  @top = []
-  h = Hash.new(0)
-  all.flatten.each{|name| h[name] += 1}
-  h.each{|name,count| @top << name if count >= 3}
-
+  #accepted = [".mp3"]
+  #@records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
+  #all = []
+  #$users.each do |user|
+  #  all << userfile(user)
+  #end
+  #@top = []
+  #h = Hash.new(0)
+  #all.flatten.each{|name| h[name] += 1}
+  #h.each{|name,count| @top << name if count >= 3}
+  @records = get_tracks
+  puts @records
+  @top = get_favorites
   haml :overview
 end
 
@@ -108,11 +71,11 @@ get "/links/?" do
   haml :links
 end
 
-["s", "c", "d", "n"].each do |path|
+$users.each do |path|
   get "/#{path}/?" do
     protected!
     @records = []
-    userfile(path).each{|r| @records << r+".mp3"}
+    get_user_favs(path).each{|r| @records << r}
     haml path.to_sym
   end
 end
@@ -138,9 +101,6 @@ post "/upload/?" do
     File.open("public/" + params['file'][:filename].gsub(/\s+/, "_"), "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
-    File.open("public/" + params['file'][:filename].gsub(/\s+/, "_").gsub(/\.mp3|\.wav/, "") + ".txt", "w+") do |d|
-      d.write("uploaded: #{Time.now.ctime}\n")
-    end
     
     redirect "/overview"
   end
@@ -151,8 +111,8 @@ get "/favs/:who/:track?" do
   if params[:who]
     user = params[:who]
     track = params[:track]
-    file = userfile user
-    if !file.include?(params["track"])
+    favs = get_user_favs(user)
+    if !favs.include?(params["track"])
       return "true"
     else
       return "false"
@@ -164,17 +124,15 @@ post "/update/favs/:who/?" do
   protected!
   if params[:who]
     user = params[:who]
-    file = userfile user
-    if !file.include?(params["fav"])
-      File.open("public/"+user+".txt", "a+") {|f|
-        f << params["fav"]+"\n"
-      }
+    favs = get_user_favs(user)
+    if !favs.include?(params["fav"])
+      add_user_favs(user, params["fav"])
+      add_track_like(params["fav"])
     else
-      `sed -i '/\\b\\(#{params["fav"]}\\)\\b/d' #{File.join ("public/"+user+".txt")}`
+      delete_user_favs(user, (params["fav"]))
+      delete_track_like(params["fav"])
     end
-    #record = params[fav.to_sym]
   end
-  #redirect "/overview?user=#{session[:user]}/#div_#{record}"
 end
 
 post "/update/:record/?" do
@@ -183,13 +141,16 @@ post "/update/:record/?" do
     haml :error
   else
     if params[:comment]
-      File.open("public/#{params[:record]}", "a+") {|f|
-        f << session[:user]+"# "+params[:comment].gsub(/\r\n?/, "")+"\n"
-      }
+      track = Pipeline::Track.find_by(:name => params[:record].gsub(/\.txt/,""))
+      track.comments[Time.now.to_i] = session[:user]+"#"+params[:comment]
+      track.save
     end
     if params[:rmcomment]
-      `sed -i '/\\b\\(#{params[:rmcomment]}\\)\\b/d' #{File.join("public/#{params[:record]}")}`
+      track = Pipeline::Track.find_by(:name => params[:record].gsub(/\.txt/,""))
+      track.comments.delete(params[:comment_id])
+      track.save
     end
+    
     redirect "/overview?user=#{session[:user]}/#div_#{params[:record].gsub(".txt", "")}"
   end
 end
@@ -197,7 +158,7 @@ end
 # get single record
 get "/download/:record/?" do
   protected!
-  send_file File.join(settings.public_folder, "#{params[:record]}")
+  send_file File.join(settings.public_folder, "#{params[:record]}.mp3"), :type => :mp3, :filename => "#{params[:record]}.mp3"
 end
 
 # delete form
@@ -209,17 +170,14 @@ end
 get "/delete/link/:link" do
   protected!
   `sed -i '#{params[:link].to_i}d' #{File.join("public/links.txt")}`
+  
   redirect "/links"
 end
 
 # remove from server
 get "/remove/:record/?" do
   protected!
-  # remove audio file and comments file
-  `rm public/#{params[:record]} && rm public/#{params[:record].gsub(/\.mp3|\.wav/, ".txt")}`
-  # remove from users favs file
-  $users.each do |user|
-    `sed -i '/\\b\\(#{params[:record].sub(/\.mp3|\.wav/, "")}\\)\\b/d' #{File.join("public/"+user+".txt")}`
-  end
-  #redirect "/overview"
+  delete_track(params[:record])
+  
+  redirect "/overview"
 end

@@ -1,30 +1,34 @@
-- @text = File.read File.join "public", locals[:record].gsub(/\.mp3|\.wav/, ".txt")
-- @id = locals[:record].gsub(/\.mp3|\.wav/, "")
+- name = locals[:record]
+- track = Pipeline::Track.find_by(:name => name)
+- comments = track.comments
+- puts comments
 - idx = locals[:idx]
 %button.btn.btn-default{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:20px;"}
   %span.glyphicon.glyphicon-option-horizontal
   %span.badge.badge-notify{:style=>"position:relative;background-color:red;"}
-    = comments(@id).drop(1).size
+    = comments.size
 %br
 #text.collapse{:id=>"#{idx}"}
-  %p= comments(@id).first
+  %p= track.created_at
   %ul{:style=>"list-style:none;padding:0px;"}
-  - comments(@id).drop(1).each do |line|
-    - from = line.split("#").first+":"
-    %li.well{:style=>"list-style:none;margin:0px;padding:10px;"}
-      %div.badge{:style=>"float:left;margin-right:5px;display:table-cell;"}= from
-      %div{:style=>"display:table-cell;"}
+  - comments.each do |key, value|
+    - unless value.blank?
+      - from = value.to_s.split("#").first+":"
+      %li.well{:style=>"list-style:none;margin:0px;padding:10px;"}
+        %div.badge{:style=>"float:left;margin-right:5px;display:table-cell;"}= from
+        %div{:style=>"display:table-cell;"}
         - time = Regexp.new(/(\d{1,2}:\d{2})/)
-        - text = line.split("#").last
-        - times = text.scan(/#{time}/).flatten.compact
+        - text = value.split("#").last
+        - times = value.scan(/#{time}/).flatten.compact
         - times.each{|t| text.gsub!(t, timelink(t, idx))} if times.size > 0
         %p= text
-      - if from =~ /#{session[:user]}/
-        %form{:action => "/update/#{locals[:record].gsub(/\.mp3|\.wav/, ".txt")}", :method => "post"}
-          %input{:type=>"hidden", :name=>"rmcomment", :value=>"#{line}"}
-          %input.btn.btn-default.btn-sm{:type=>"submit", :value=>"remove"}
+        - if from =~ /#{session[:user]}/
+          %form{:action => "/update/#{name}", :method => "post"}
+            %input{:type=>"hidden", :name=>"rmcomment", :value=>"#{value}"}
+            %input.btn.btn-default.btn-sm{:type=>"submit", :value=>"remove"}
+            %input.btn.btn-default.btn-sm{:name=>"comment_id", :type=>"hidden", :value=>key}
   %br
-  %form{:action => "/update/#{locals[:record].gsub(/\.mp3|\.wav/, ".txt")}", :method => "post"}
+  %form{:action => "/update/#{name}", :method => "post"}
     %textarea.form-control{ :id =>"field#{idx}", :name=>"comment", :placeholder=>"comment by #{session[:user]}:", :style=>"margin-bottom:10px;"}
     %input.btn.btn-default{:id =>"submit_#{idx}", :type=>"submit", :value=>"send", :onclick => "update('#{idx}')" }
     :javascript

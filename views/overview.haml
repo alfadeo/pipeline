@@ -1,8 +1,8 @@
 #favorites.alert.alert-success
   %strong Favoriten
   - @top.each do |fav|
-    %p{:style=>"cursor:pointer;", :onclick=>"focusTrack(\"div_#{fav}\")"}
-      = fav
+    %p{:style=>"cursor:pointer;", :onclick=>"focusTrack(\"div_#{fav.name}\")"}
+      = fav.name
 
 %hr
 :javascript
@@ -64,14 +64,14 @@
   }
 
 - @records.each_with_index do |record, idx|
-  #div.well.well-sm{:id=>"#{record.gsub(/\.mp3|\.wav/,"")}", :tabindex=>"-1"}
+  #div.well.well-sm{:id=>"#{record}", :tabindex=>"-1"}
     %h3{:style=>"display:block;"}
-      = record.gsub(/\.mp3|\.wav/,"")
+      = record
     %progress.progress{:id=>"progress#{idx}", :max=>"100", :value=>"0"}
     :javascript
       var playClicked#{idx} = false;
       var wavesurfer#{idx} = WaveSurfer.create({
-          container: "#div_#{record.gsub(/\.mp3|\.wav/,"")}",
+          container: "#div_#{record}",
           backend: 'MediaElement',
           progressColor: 'hsla(200, 100%, 30%, 0.5)',
           cursorColor: '#fff',
@@ -113,13 +113,15 @@
         })
       })
       wavesurfer#{idx}.on("finish", function() {
-        wavesurfer#{idx+1}.load('#{@records[idx+1]}');
+        wavesurfer#{idx+1}.load('#{@records[idx+1]}.mp3');
         wavesurfer#{idx+1}.playPause();
-        focusTrack("div_#{@records[idx+1].gsub(/\.mp3|\.wav/,"") unless @records[idx+1].nil?}");
+        if (true !== #{@records[idx+1].nil?}) {
+          focusTrack("div_#{@records[idx+1]}");
+        }
       })
    
     %div.btn-group
-      %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.play();if (playClicked#{idx} == false){wavesurfer#{idx}.load('#{record}')};"}
+      %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.play();if (playClicked#{idx} == false){wavesurfer#{idx}.load('#{record}.mp3')};"}
         %i.glyphicon.glyphicon-play
       %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.pause();"}
         %i.glyphicon.glyphicon-pause
@@ -129,13 +131,12 @@
         %i.glyphicon.glyphicon-time
       %a.btn.btn-default{ :href=>"#{to("/delete/#{record}")}", :style=>"text-decoration:none;"}
         %i.glyphicon.glyphicon-trash
-      - recordname = record.gsub(/\.mp3|\.wav/, "")
-      %button.btn.btn-default{:onclick=>"loadComments('#{recordname}', '#{idx}')", :data=>{:toggle=>"collapse", :target=>"#comments#{idx}"}}
+      -#%button.btn.btn-default{:onclick=>"loadComments('#{record}', '#{idx}')", :data=>{:toggle=>"collapse", :target=>"#comments#{idx}"}}
         %span.glyphicon.glyphicon-option-horizontal
       - $users.each do |user|
-        - favs = userfile(user)
-        %button.btn{:id=>"fav"+idx.to_s+user, :onclick=>"updateFavs('#{user}', '#{idx}', '#{recordname}')", :onmouseup=>"updateButton('#{user}', '#{idx}', '#{recordname}')", :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{recordname})\b/ ? "btn-warning" : "btn-default")]}
-          %span.glyphicon{:id=>"favicon"+idx.to_s+user, :class=> (favs.join(" ") =~ /\b(#{recordname})\b/ ? "glyphicon-ok" : "glyphicon-ok-sign")}
+        - favs = get_user_favs(user)
+        %button.btn{:id=>"fav"+idx.to_s+user, :onclick=>"updateFavs('#{user}', '#{idx}', '#{record}')", :onmouseup=>"updateButton('#{user}', '#{idx}', '#{record}')", :class => [("disabled" if session[:user] != user), (favs.join(" ") =~ /\b(#{record})\b/ ? "btn-warning" : "btn-default")]}
+          %span.glyphicon{:id=>"favicon"+idx.to_s+user, :class=> (favs.join(" ") =~ /\b(#{record})\b/ ? "glyphicon-ok" : "glyphicon-ok-sign")}
             = user
     %div.well.collapse{:id=> "comments#{idx}"}
-    -#= haml :edit, :locals => {:record => "#{record}", :idx => idx}
+    = haml :edit, :locals => {:record => "#{record}", :idx => idx}
