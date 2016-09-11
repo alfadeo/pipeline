@@ -1,7 +1,6 @@
 - name = locals[:record]
 - track = Pipeline::Track.find_by(:name => name)
 - comments = track.comments
-- puts comments
 - idx = locals[:idx]
 %button.btn.btn-default{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#text_#{idx}"}, :style=>"margin-left:20px;"}
   %span.glyphicon.glyphicon-option-horizontal
