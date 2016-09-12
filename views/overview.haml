@@ -64,10 +64,10 @@
   }
 
 - @records.each_with_index do |record, idx|
+  - owner = get_track_owner(record)
   #div.well.well-sm{:id=>"#{record}", :tabindex=>"-1"}
     %h3{:style=>"display:block;"}
-      = record
-    %progress.progress{:id=>"progress#{idx}", :max=>"100", :value=>"0"}
+      = (owner != nil ? owner + ": " + record : record)
     :javascript
       var playClicked#{idx} = false;
       var wavesurfer#{idx} = WaveSurfer.create({
@@ -77,19 +77,18 @@
           cursorColor: '#fff',
           normalize: true,
           //barWidth: '3',
-          pixelRatio: '1'
+          pixelRatio: '1',
+          fillParent: true
+      });
+      $( document ).ready(function() {
+        wavesurfer#{idx}.load('#{@records[idx]}.mp3', #{get_track_waveform(record)});
+        var timeline = Object.create(WaveSurfer.Timeline);
+        timeline.init({
+        wavesurfer: wavesurfer#{idx},
+        container: "#div_timeline_#{record}"
+        });
       });
       all.push(wavesurfer#{idx});
-      wavesurfer#{idx}.on('loading', function (percents) {
-        document.getElementById('progress#{idx}').value = percents;
-        if (percents === 100) {
-          document.getElementById('progress#{idx}').style.display = 'none'
-        }
-      });
-      wavesurfer#{idx}.on('ready', function (percents) {
-        playClicked#{idx} = true;
-        wavesurfer#{idx}.play();
-      });
       wavesurfer#{idx}.on('audioprocess', function () {
         time = wavesurfer#{idx}.getDuration();
         minutes = Math.floor(time / 60);
@@ -113,15 +112,14 @@
         })
       })
       wavesurfer#{idx}.on("finish", function() {
-        wavesurfer#{idx+1}.load('#{@records[idx+1]}.mp3');
-        wavesurfer#{idx+1}.playPause();
-        if (true !== #{@records[idx+1].nil?}) {
+        if (true !== #{@records[idx+1].blank?}) {
+          wavesurfer#{idx+1}.playPause();
           focusTrack("div_#{@records[idx+1]}");
         }
       })
-   
+    #div{:id=>"timeline_#{record}", :tabindex=>"-1"}
     %div.btn-group
-      %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.play();if (playClicked#{idx} == false){wavesurfer#{idx}.load('#{record}.mp3')};"}
+      %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.play();"}
         %i.glyphicon.glyphicon-play
       %button.btn.btn-default{:onclick=>"wavesurfer#{idx}.pause();"}
         %i.glyphicon.glyphicon-pause

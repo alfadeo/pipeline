@@ -30,6 +30,7 @@ module Pipeline
         field :owner,  type: String
         field :comments, type: Hash, default: {}
         field :likes, type: Integer, default: 0
+        field :waveform, type: Array
       end
     end
     Pipeline.const_set klass,c
@@ -56,6 +57,11 @@ end
 def add_track(track)
   t = Pipeline::Track.new
   t.name = track
+  t.owner = session[:user]
+  `audiowaveform -i "public/#{track}.mp3" -o "public/#{track}.json" --pixels-per-second 1 -b 16 -h 10`
+  file = File.read("public/"+track+".json")
+  json = JSON.parse file
+  t.waveform = json["data"]
   t.save
 end
 
@@ -88,9 +94,19 @@ def get_track_id(name)
   track.id
 end
 
+def get_track_owner(name)
+  track = Pipeline::Track.find_by(:name => name)
+  track.owner
+end
+
+def get_track_waveform(name)
+  track = Pipeline::Track.find_by(:name => name)
+  track.waveform
+end
+
 def get_tracks
   out = []
-  tracks = Pipeline::Track.all
+  tracks = Pipeline::Track.all.order_by(:created_at.desc)
   tracks.each{|t| out << t.name}
   out
 end
@@ -101,17 +117,18 @@ end
 
 def delete_track(track)
   # delete from Tracks collection
-  track = Pipeline::Track.find_by(:name => name)
-  track.delete
+  t = Pipeline::Track.find_by(:name => track)
+  t.delete
   # delete from each user favs
   $users.each do |u|
     user = Pipeline::User.find_by(:name => u)
-    user.favorites.delete(track)
+    user.favs.delete(track)
     user.save
   end
   # delete from public dir
   `rm pubic/#{track}.mp3`
   `rm pubic/#{track}.wav`
+  `rm pubic/#{track}.json`
 end 
 
 def admin?

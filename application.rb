@@ -43,7 +43,6 @@ end
 get "/overview/?:user?/?:div?" do
   protected!
   @records = get_tracks
-  puts @records
   @top = get_favorites
   haml :overview
 end
@@ -89,7 +88,8 @@ post "/upload/?" do
     File.open("public/" + params['file'][:filename].gsub(/\s+/, "_"), "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
-    
+    add_track(params['file'][:filename].gsub(/\s+/, "_").gsub(/\.mp3|\.wav/,""))
+
     redirect "/overview"
   end
 end
