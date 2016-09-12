@@ -10,7 +10,7 @@ Mongoid.raise_not_found_error = false # return nil if no document is found
 $mongo = Mongo::Client.new("mongodb://127.0.0.1:27017/pipeline")
 $gridfs = $mongo.database.fs
 
-CLASSES = ["Track","User"]
+CLASSES = ["Track","User","Link"]
 
 module Pipeline
   CLASSES.each do |klass|
@@ -22,6 +22,9 @@ module Pipeline
       if klass == "User"
         field :name, type: String
         field :favs, type: Array, default: []
+      elsif klass == "Link"
+        field :uri, type: String
+        field :info, type: String
       else
         field :name,  type: String
         field :owner,  type: String
@@ -125,6 +128,22 @@ end
 
 def links
   File.readlines(File.join "public/links.txt").map{ |line| line.gsub("\n","")}.compact
+end
+
+def get_links
+  Pipeline::Link.all
+end
+
+def add_link(uri, info)
+  l = Pipeline::Link.new
+  l.uri = uri
+  l.info = info
+  l.save
+end
+
+def delete_link(uri)
+  l = Pipeline::Link.find_by(:uri => uri)
+  l.delete
 end
 
 def timelink(time, id)

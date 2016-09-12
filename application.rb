@@ -42,18 +42,6 @@ end
 
 get "/overview/?:user?/?:div?" do
   protected!
-  # display overview
-  #accepted = [".mp3", ".wav"]
-  #accepted = [".mp3"]
-  #@records = Dir.entries("public/").select {|f| (!File.directory? f) && (accepted.include? File.extname f)}.sort{ |a,b| File.mtime("public/"+b) <=> File.mtime("public/"+a) }
-  #all = []
-  #$users.each do |user|
-  #  all << userfile(user)
-  #end
-  #@top = []
-  #h = Hash.new(0)
-  #all.flatten.each{|name| h[name] += 1}
-  #h.each{|name,count| @top << name if count >= 3}
   @records = get_tracks
   puts @records
   @top = get_favorites
@@ -68,6 +56,8 @@ end
 
 get "/links/?" do
   protected!
+  @links = get_links
+
   haml :links
 end
 
@@ -82,10 +72,8 @@ end
 
 post "/links/?" do
   protected!
-  File.open("public/links.txt", "a+") {|f|
-    f << "<a href=\"#{params[:comment]}\">"+(params[:title] ? params[:title] : params[:comment])+"</a>"+"\n"
-  }
-
+  add_link(params[:comment],params[:title])
+  
   redirect "/links"
 end
 
@@ -141,12 +129,12 @@ post "/update/:record/?" do
     haml :error
   else
     if params[:comment]
-      track = Pipeline::Track.find_by(:name => params[:record].gsub(/\.txt/,""))
+      track = Pipeline::Track.find_by(:name => params[:record])
       track.comments[Time.now.to_i] = session[:user]+"#"+params[:comment]
       track.save
     end
     if params[:rmcomment]
-      track = Pipeline::Track.find_by(:name => params[:record].gsub(/\.txt/,""))
+      track = Pipeline::Track.find_by(:name => params[:record])
       track.comments.delete(params[:comment_id])
       track.save
     end
@@ -167,10 +155,10 @@ get "/delete/:record" do
   haml :delete, :locals => {:record => params[:record]}
 end
 
-get "/delete/link/:link" do
+post "/delete/link/?" do
   protected!
-  `sed -i '#{params[:link].to_i}d' #{File.join("public/links.txt")}`
-  
+  delete_link(params[:link])
+ 
   redirect "/links"
 end
 

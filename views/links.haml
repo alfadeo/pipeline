@@ -6,8 +6,14 @@
     %br
     %button{:id=>"submit", :style=>"margin:10px 0px 10px 0px;"} save
   %hr
-  - links.each.with_index do |link, idx|
-    %a.btn.btn-default{:href=>"/delete/link/#{idx+1}", :style=>"float:left;margin-right:1em;"}
-      %span.glyphicon.glyphicon-trash
-    %p= link
-    %br
+  - @links.each do |link|
+    %form{:name => "form", :action => to('/delete/link'), :method => "post", :enctype => "multipart/form-data" }
+      %button.btn.btn-default{:id=>"submit", :style=>"float:left;margin-right:1em;"}
+        %span.glyphicon.glyphicon-trash
+      %input{:type=>"hidden", :name=>"link", :value=>link.uri }
+
+      %p
+        = link.info
+      %a{ :href=> link.uri}
+        = link.uri
+      %hr
