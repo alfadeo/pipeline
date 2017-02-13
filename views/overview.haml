@@ -82,11 +82,11 @@
       });
       $( document ).ready(function() {
         wavesurfer#{idx}.load('#{@records[idx]}.mp3', #{get_track_waveform(record)});
-        var timeline = Object.create(WaveSurfer.Timeline);
-        timeline.init({
-        wavesurfer: wavesurfer#{idx},
-        container: "#div_timeline_#{record}"
-        });
+        //var timeline = Object.create(WaveSurfer.Timeline);
+        //timeline.init({
+        //wavesurfer: wavesurfer#{idx},
+        //container: "#div_timeline_#{record}"
+        //});
       });
       all.push(wavesurfer#{idx});
       wavesurfer#{idx}.on('audioprocess', function () {

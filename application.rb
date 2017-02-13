@@ -1,6 +1,7 @@
 require "rubygems"
 require "sinatra"
 require "sinatra/reloader"
+require 'builder'
 require "haml"
 require "json"
 require 'mongoid'
@@ -18,7 +19,7 @@ also_reload File.join "./helper.rb"
 #set :show_exceptions, false
 
 configure :development do
-  $logger = Logger.new(STDOUT)
+  #$logger = Logger.new(STDOUT)
 end
 
 error do
@@ -53,6 +54,12 @@ get "/upload/?" do
   haml :upload
 end
 
+get "/rss.xml" do
+  @links = get_links
+
+  builder :rss
+end
+
 get "/links/?" do
   protected!
   @links = get_links
@@ -82,13 +89,15 @@ post "/upload/?" do
   if !params[:file]
     haml :error
   else
-    if params['file'][:filename] =~ /$.wav/
-      params['file'].to_mp3
+    if params['file'][:filename] =~ /\.wav/
+      puts params['file'][:filename]
+      is_wav = true
     end
     File.open("public/" + params['file'][:filename].gsub(/\s+/, "_"), "w+") do |f|
       f.write(params['file'][:tempfile].read)
     end
-    add_track(params['file'][:filename].gsub(/\s+/, "_").gsub(/\.mp3|\.wav/,""))
+    to_mp3(params['file'][:filename]) if is_wav
+    add_track(params['file'][:filename].gsub(/\s+/, "_").gsub(/\.wav/,""))
 
     redirect "/overview"
   end

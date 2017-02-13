@@ -58,8 +58,8 @@ def add_track(track)
   t = Pipeline::Track.new
   t.name = track
   t.owner = session[:user]
-  `audiowaveform -i "public/#{track}.mp3" -o "public/#{track}.json" --pixels-per-second 1 -b 16 -h 10`
-  file = File.read("public/"+track+".json")
+  `audiowaveform -i "/home/alfadeo/pipeline/public/#{track}.mp3" -o "/home/alfadeo/pipeline/public/#{track}.json" --pixels-per-second 1 -b 16 -h 10`
+  file = File.read File.join("public/#{track}.json")
   json = JSON.parse file
   t.waveform = json["data"]
   t.save
@@ -126,9 +126,9 @@ def delete_track(track)
     user.save
   end
   # delete from public dir
-  `rm pubic/#{track}.mp3`
-  `rm pubic/#{track}.wav`
-  `rm pubic/#{track}.json`
+  `rm /home/alfadeo/pipeline/public/#{track}.mp3`
+  `rm /home/alfadeo/pipeline/public/#{track}.wav`
+  `rm /home/alfadeo/pipeline/public/#{track}.json`
 end 
 
 def admin?
@@ -148,7 +148,7 @@ def links
 end
 
 def get_links
-  Pipeline::Link.all
+  Pipeline::Link.all.order_by(:created_at => 'desc')
 end
 
 def add_link(uri, info)
@@ -174,7 +174,7 @@ def wavepeaks(track)
 end
 
 def to_mp3(track)
-  i = File.join "public", track
-  o = File.join "public", track.gsub(".wav", ".mp3")
+  i = "/home/alfadeo/pipeline/public/#{track}"
+  o = "/home/alfadeo/pipeline/public/#{track.gsub(".wav", ".mp3")}"
   `lame -h -b 256 #{i} #{o}`
 end
