@@ -1,13 +1,15 @@
+ENV["PIPELINE_ENV"] ||= "production"
+CENTRAL_MONGO_IP = `grep -oP '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?=.*mongodb)' /etc/hosts`.chomp
 Mongoid.load_configuration({
   :clients => {
     :default => {
       :database => "pipeline",
-      :hosts => ["localhost:27017"],
+      :hosts => (CENTRAL_MONGO_IP.blank? ? ["localhost:27017"] : ["#{CENTRAL_MONGO_IP}:27017"]),
     }
   }
 })
 Mongoid.raise_not_found_error = false # return nil if no document is found
-$mongo = Mongo::Client.new("mongodb://127.0.0.1:27017/pipeline")
+$mongo = Mongo::Client.new("mongodb://#{(CENTRAL_MONGO_IP.blank? ? "127.0.0.1" : CENTRAL_MONGO_IP)}:27017/#{ENV['PIPELINE_ENV']}")
 $gridfs = $mongo.database.fs
 
 CLASSES = ["Track","User","Link"]
