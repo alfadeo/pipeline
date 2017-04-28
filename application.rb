@@ -38,6 +38,7 @@ post "/login" do
   ["admin", "pass", "user"].each do |key|
     session[key.to_sym] = params[key.to_sym]
   end
+  add_db_user
   redirect "/overview"
 end
 
@@ -97,7 +98,7 @@ post "/upload/?" do
       f.write(params['file'][:tempfile].read)
     end
     to_mp3(params['file'][:filename]) if is_wav
-    add_track(params['file'][:filename].gsub(/\s+/, "_").gsub(/\.wav/,""))
+    add_track(params['file'][:filename].gsub(/\s+/, "_").gsub(/\.wav|\.mp3/,""))
 
     redirect "/overview"
   end

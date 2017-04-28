@@ -39,28 +39,37 @@ module Pipeline
   end
 end
 
+def add_db_user
+  u = Pipeline::User.find_by(:name => session[:user])
+  if u.nil?
+    u = Pipeline::User.new
+    u.name = session[:user]
+    u.save
+  end
+end
+
 def get_user_favs(user)
-  who = Pipeline::User.find_by(:name => user)
-  favs = who.favs
+  u = Pipeline::User.find_by(:name => user)
+  u.favs
 end
 
 def add_user_favs(user, track)
-  who = Pipeline::User.find_by(:name => user)
-  who.favs << track
-  who.save
+  u = Pipeline::User.find_by(:name => user)
+  u.favs << track
+  u.save
 end
 
 def delete_user_favs(user, track)
-  who = Pipeline::User.find_by(:name => user)
-  who.favs.delete(track)
-  who.save
+  u = Pipeline::User.find_by(:name => user)
+  u.favs.delete(track)
+  u.save
 end
 
 def add_track(track)
   t = Pipeline::Track.new
   t.name = track
   t.owner = session[:user]
-  `audiowaveform -i "/home/alfadeo/pipeline/public/#{track}.mp3" -o "/home/alfadeo/pipeline/public/#{track}.json" --pixels-per-second 1 -b 16 -h 10`
+  `audiowaveform -i "/home/alfadeo/pipeline/public/#{track}.mp3" -o "/home/alfadeo/pipeline/public/#{track}.json" --pixels-per-second 10 -b 16 -h 10`
   file = File.read File.join("public/#{track}.json")
   json = JSON.parse file
   t.waveform = json["data"]
@@ -122,8 +131,8 @@ def delete_track(track)
   t = Pipeline::Track.find_by(:name => track)
   t.delete
   # delete from each user favs
-  $users.each do |u|
-    user = Pipeline::User.find_by(:name => u)
+  users = Pipeline::User.all
+  users.each do |user|
     user.favs.delete(track)
     user.save
   end
